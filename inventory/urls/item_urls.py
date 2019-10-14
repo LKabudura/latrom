@@ -50,9 +50,6 @@ equipment_router.register(r'^api/equipment', views.EquipmentAPIView)
 equipment_urls = [
     re_path(r'^equipment-create/?$', views.EquipmentCreateView.as_view(), 
         name="equipment-create"),
-    re_path(r'^equipment-and-consumables-purchase/?$', 
-        views.EquipmentandConsumablesPurchaseView.as_view(), 
-        name="equipment-and-consumables-purchase"),
     re_path(r'^equipment-list/?$', views.EquipmentListView.as_view(), 
         name="equipment-list"),
     re_path(r'^equipment-update/(?P<pk>[\w]+)/?$', 

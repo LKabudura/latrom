@@ -8,13 +8,6 @@ import latrom
 from common_data.models import GlobalConfig
 import os
 import datetime
-from accounting.models import Bookkeeper
-from employees.models import PayrollOfficer
-from inventory.models import InventoryController
-from invoicing.models import SalesRepresentative
-from services.models import ServicePerson
-from employees.models import Employee
-
 class LicenseMiddlewareTest(TestCase):
     fixtures = ['common.json']
 
@@ -68,14 +61,7 @@ class UserMiddlewareTest(TestCase):
     def setUpTestData(cls):
         cls.user = User.objects.create_superuser('Testuser', 'admin@mail.com', '123')
         
-        cls.employee = Employee.objectst.create(
-            first_name = 'second',
-            last_name = 'Last',
-            address = 'Model test address',
-            email = 'test@mail.com',
-            phone = '1234535234',
-            user=cls.user
-        )
+        
 
     def setUp(self):
         self.client.login(username='Testuser', password='123')
@@ -88,9 +74,7 @@ class UserMiddlewareTest(TestCase):
     def test_calendar_urls(self):
         pass
 
-    def test_employee_urls(self):
-        pass
-
+    
     def test_bookkeeper_urls(self):
         pass
 
@@ -99,8 +83,3 @@ class UserMiddlewareTest(TestCase):
 
     def test_sales_urls(self):
         pass
-
-    def test_services_urls(self):
-        pass
-
-        

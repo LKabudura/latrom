@@ -284,12 +284,6 @@ class CreateMultipleSuppliersView(FormView):
                     email = line['email'],
                     phone = line['phone'],
                 )
-            sup = models.Supplier.objects.create(
-                    organization=org
-                )
-            if line['account_balance']:
-                    sup.account.balance = line['account_balance']
-                    sup.account.save()
 
         return resp
 
@@ -321,7 +315,6 @@ class ImportSuppliersView(ContextMixin, FormView):
                 form.cleaned_data['phone'],
                 form.cleaned_data['address'],
                 form.cleaned_data['email'],
-                form.cleaned_data['account_balance'],
             ]
             wb = openpyxl.load_workbook(file.file)
             try:
@@ -343,14 +336,5 @@ class ImportSuppliersView(ContextMixin, FormView):
                     phone =null_buster(row[
                         form.cleaned_data['phone'] - 1].value),
                 )
-
-                sup = models.Supplier.objects.create(
-                    organization=org
-                )
-                if row[form.cleaned_data['account_balance'] -1].value:
-                    sup.account.balance = row[
-                        form.cleaned_data['account_balance'] -1].value
-                
-                    sup.account.save()
                 
         return resp

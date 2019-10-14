@@ -7,27 +7,22 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from accounting.models import Account, JournalEntry, Tax
 from common_data.models import Organization, Individual
 
-from common_data.tests import create_account_models, create_test_user
+from common_data.tests import  create_test_user
 from inventory import models
 from invoicing.models import (InvoiceLine, 
                               Invoice, 
                               Customer, 
                               ProductLineComponent)
-from employees.models import Employee
 from django.contrib.auth.models import User
 from inventory.tests.model_util import InventoryModelCreator
 TODAY = datetime.date.today()
-from planner.models import Event
-from inventory.util import InventoryService
 
 
 
 
 def create_test_inventory_models(cls):
-    create_account_models(cls)
     if User.objects.all().count() ==0:
         User.objects.create_user(username='some_user')
 
@@ -38,7 +33,6 @@ def create_test_inventory_models(cls):
 
     cls.supplier = models.Supplier.objects.create(
             organization=cls.organization,
-            account = cls.account_c
             )
 
     InventoryModelCreator(cls).create_inventory_controller()
@@ -117,7 +111,7 @@ def create_test_inventory_models(cls):
     cls.order = models.Order.objects.create(
             expected_receipt_date = TODAY,
             date = TODAY,
-            tax = Tax.objects.first(), #10%
+            tax = 10, 
             supplier=cls.supplier,
             bill_to = 'Test Bill to',
             ship_to = cls.warehouse,
@@ -185,7 +179,7 @@ def create_test_inventory_models(cls):
         )
 
 class CommonModelTests(TestCase):
-    fixtures = ['common.json', 'employees.json','inventory.json','accounts.json', 'journals.json']
+    fixtures = ['common.json', 'inventory.json']
 
     @classmethod
     def setUpTestData(cls):
@@ -196,9 +190,7 @@ class CommonModelTests(TestCase):
         obj.inventory_check_date=22
         obj.save()
     
-    def test_create_invetory_controller(self):
-        self.assertIsInstance(self.controller, models.InventoryController)
-    
+   
     def test_create_supplier(self):
         ind = Individual.objects.create(
             first_name="Test",
@@ -297,7 +289,7 @@ class CommonModelTests(TestCase):
 
 
 class ItemManagementModelTests(TestCase):
-    fixtures = ['common.json', 'employees.json','inventory.json','accounts.json', 'journals.json']
+    fixtures = ['common.json', 'inventory.json']
 
     @classmethod
     def setUpTestData(cls):
@@ -556,7 +548,7 @@ class ItemManagementModelTests(TestCase):
 
 
 class ItemModelTests(TestCase):
-    fixtures = ['common.json', 'employees.json','inventory.json','accounts.json', 'journals.json', 'invoicing.json']
+    fixtures = ['common.json','inventory.json', 'invoicing.json']
 
     @classmethod
     def setUpTestData(cls):
@@ -692,7 +684,7 @@ class ItemModelTests(TestCase):
         self.order.save()
 
 class WarehouseModelTests(TestCase):
-    fixtures = ['common.json', 'employees.json','inventory.json','accounts.json', 'journals.json',]
+    fixtures = ['common.json','inventory.json']
 
     @classmethod
     def setUpTestData(cls):
@@ -807,24 +799,3 @@ class WarehouseModelTests(TestCase):
     def test_storage_media_children(self):
         self.assertEqual(self.medium.children.count(), 0)
 
-
-class InventoryServiceTests(TestCase):
-    fixtures = ['inventory.json', 'common.json']
-    
-    @classmethod
-    def setUpTestData(cls):
-        InventoryModelCreator(cls).create_all()
-        cls.usr = User.objects.create_user(username ='Testuser', password='123')
-        cls.employee = Employee.objects.create(
-            first_name='name',
-            last_name='name',
-            user=cls.usr
-        )
-        cls.controller = models.InventoryController.objects.create(
-            employee=cls.employee
-        )
-    def test_inventory_service(self):
-        self.warehouse.inventory_controller = self.controller
-        self.warehouse.save()
-        InventoryService().run()
-        self.assertEqual(Event.objects.all().count(), 1)

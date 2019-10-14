@@ -27,17 +27,38 @@ SECRET_KEY = 'yilhuf8!02%k(wqj%qmqxwk8xrv2vsvq026lp%n1b+sfyhk^=c'
 
 
 
+DEBUG = True
+BASE_DIR = os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__))))
+    
+ALLOWED_HOSTS = ["*"]
+
+
+#TODO update with the new database util
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    },
+    
+}
+
+#DATABASE_ROUTERS = ['messaging.db.router.MessagingRouter']
+
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': '/',
+        'STATS_FILE': os.path.join(BASE_DIR, 'assets', 'webpack-stats.json'),
+    }
+}
+
+
+
 # Application definition
 USER_APPS = [
     'common_data',
     'invoicing',
     'inventory',
-    'employees',
-    'accounting',
-    'services',
-    'planner',
-    'messaging',
-    'manufacturing'
 ]
 
 INSTALLED_APPS = [
@@ -52,7 +73,6 @@ INSTALLED_APPS = [
     'django_filters',
     'crispy_forms',
     'wkhtmltopdf',
-    'reversion',
     'background_task',
     'dbbackup',
     'formtools',
@@ -79,9 +99,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'common_data.middleware.license.LicenseMiddleware',
-    'common_data.middleware.users.UserTestMiddleware',
-    'common_data.middleware.events.EventReminderMiddleware',
 ]
 
 ROOT_URLCONF = 'latrom.urls'

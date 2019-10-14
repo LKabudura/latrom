@@ -12,15 +12,8 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django_select2.forms import Select2Widget
 
-from accounting.models import (Account, 
-                               Expense, 
-                               Tax, 
-                               Bill,
-                               Asset,
-                               ASSET_CHOICES,
-                               AccountingSettings)
+
 from common_data.forms import BootstrapMixin
-from employees.models import Employee
 from common_data.models import Individual, Organization
 import datetime
 from . import models
@@ -182,7 +175,7 @@ class ItemInitialMixin(forms.Form):
                 expected_receipt_date=datetime.date.today(),
                 ship_to=wh,
                 status='received',
-                tax=self.cleaned_data.get('tax', Tax.objects.first()),#none
+                tax=self.cleaned_data.get('tax', 0),#none
                 notes='Auto generated order for items with initial inventory',
             )
             
@@ -203,7 +196,7 @@ class ProductForm(ItemInitialMixin, forms.ModelForm, BootstrapMixin):
     markup = forms.CharField(widget=forms.NumberInput, required=False)
     direct_price = forms.CharField(widget=forms.NumberInput, required=False)
     type=forms.CharField(widget=forms.HiddenInput)
-    tax=forms.ModelChoiceField(Tax.objects.all())
+    tax=forms.FloatField()
     description = forms.CharField(widget=forms.Textarea(attrs={'rows':4, 'cols':15}), required=False)    
 
     def __init__(self, *args, **kwargs):
@@ -288,16 +281,6 @@ class ProductForm(ItemInitialMixin, forms.ModelForm, BootstrapMixin):
 
 class EquipmentForm(ItemInitialMixin, forms.ModelForm, BootstrapMixin):
     type=forms.CharField(widget=forms.HiddenInput)
-    #asset name will take product equipment name
-    #description will take equipment decription
-    record_as_asset = forms.BooleanField(required=False)
-    initial_value = forms.CharField(widget=forms.NumberInput, required=False)
-    depreciation_period =forms.CharField(label="Depreciation period(years)",
-        widget=forms.NumberInput,
-        required=False)
-    date_purchased=forms.DateField(required=False)
-    salvage_value = forms.CharField(widget=forms.NumberInput, required=False)
-    asset_category = forms.ChoiceField(choices= ASSET_CHOICES, required=False)
     description = forms.CharField(widget=forms.Textarea(
         attrs={'rows':4, 'cols':15}), required=False)
 
@@ -330,21 +313,8 @@ class EquipmentForm(ItemInitialMixin, forms.ModelForm, BootstrapMixin):
                         Column('image', css_class='form group col-6'),
                     ), 
                 ),
-                Tab('Asset',
-                    'record_as_asset',
-                    'asset_category',
-                    Row(
-                        Column('initial_value', css_class="col-6"),
-                        Column('salvage_value', css_class="col-6"),
-                    ),
-                    Row(
-                        Column('date_purchased', css_class="col-6"),
-                        Column('depreciation_period', css_class="col-6"),
-                    ),
-                )
-            ),
             Div(Submit('submit', 'Submit'), css_class="floating-submit")
-
+        )
         )
 
     class Meta:
@@ -353,32 +323,6 @@ class EquipmentForm(ItemInitialMixin, forms.ModelForm, BootstrapMixin):
         widgets = {
             'supplier': Select2Widget(attrs={'data-width': '24rem'})
         }
-
-    def clean(self, *args, **kwargs):
-        cleaned_data = super().clean(*args, **kwargs)
-        cap_limit = \
-            AccountingSettings.objects.first().equipment_capitalization_limit
-        print(cap_limit)
-        print(cleaned_data['record_as_asset'])
-        print(cleaned_data['unit_purchase_price'])
-        if not cleaned_data['record_as_asset'] and \
-                cleaned_data['unit_purchase_price'] > cap_limit:
-            raise forms.ValidationError("""The purchase price for this equipment is above the capitalization limit, either adjust this limit in the accouting settings or record this equipment as an asset.""")
-        elif cleaned_data['record_as_asset'] and \
-                cleaned_data['unit_purchase_price'] < cap_limit:
-            raise forms.ValidationError("""The purchase price for this equipment is below the capitalization limit so it cannot be recorded as an asset.""")
-
-
-        if cleaned_data['record_as_asset']:
-            if cleaned_data['initial_value'] == "" or \
-                    cleaned_data['depreciation_period'] == "" or \
-                    cleaned_data['date_purchased'] == "" or \
-                    cleaned_data["salvage_value"] == "" or \
-                    cleaned_data['asset_category'] == "":
-                raise forms.ValidationError("To record equipment as an asset, all the fields in the 'Asset' tab must be filled.")
-
-        return cleaned_data
-            
 
     def save(self, **kwargs):
         instance = super().save(**kwargs)
@@ -483,10 +427,7 @@ class ConsumableForm(ItemInitialMixin, forms.ModelForm, BootstrapMixin):
 
 
 class OrderForm(forms.ModelForm, BootstrapMixin):
-    tax=forms.ModelChoiceField(
-        Tax.objects.all(),
-        widget=forms.HiddenInput
-    )
+    tax=forms.FloatField()
     make_payment= forms.BooleanField(initial=False, required=False)
     status = forms.CharField(widget=forms.HiddenInput)
     ship_to = forms.ModelChoiceField(models.WareHouse.objects.all(), label='Ship To Warehouse')
@@ -555,10 +496,7 @@ class OrderForm(forms.ModelForm, BootstrapMixin):
         
 
 class OrderUpdateForm(forms.ModelForm, BootstrapMixin):
-    tax=forms.ModelChoiceField(
-        Tax.objects.all(),
-        widget=forms.HiddenInput
-    )
+    tax=forms.FloatField()
     class Meta:
         model = models.Order
         fields = ['date', 'expected_receipt_date', 
@@ -725,22 +663,6 @@ class TransferReceiptForm(forms.ModelForm, BootstrapMixin):
         )
         self.helper.add_input(Submit('submit', 'Submit'))
 
-class InventoryControllerForm(forms.ModelForm, BootstrapMixin):
-    class Meta:
-        fields = "__all__"
-        model = models.InventoryController
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.helper = FormHelper()
-        self.helper.add_input(Submit('submit', 'Submit'))
-
-
-class InventoryControllerUpdateForm(forms.ModelForm, BootstrapMixin):
-    class Meta:
-        exclude = "employee",
-        model = models.InventoryController
 
 class ScrappingRecordForm(forms.ModelForm, BootstrapMixin):
     warehouse = forms.ModelChoiceField(models.WareHouse.objects.all(), 
@@ -925,7 +847,6 @@ class ImportSuppliersForm(forms.Form):
     address = forms.IntegerField()
     email = forms.IntegerField()
     phone = forms.IntegerField()
-    account_balance = forms.IntegerField()
     start_row = forms.IntegerField()
     end_row = forms.IntegerField()
 
@@ -946,7 +867,6 @@ class ImportSuppliersForm(forms.Form):
                 <li>Address - Suppliers Physical address that appears on bills</li>
                 <li>Email</li>
                 <li>Phone</li>
-                <li>Account Balance - current balance with supplier</li>
                 
             </ul>"""),
             Row(
@@ -954,7 +874,6 @@ class ImportSuppliersForm(forms.Form):
                 Column('address', css_class='col-2'),
                 Column('email', css_class='col-2'),
                 Column('phone', css_class='col-2'),
-                Column('account_balance', css_class='col-4'),
             ),
             HTML("""
             <h4>Rows:</h4>
@@ -967,38 +886,3 @@ class ImportSuppliersForm(forms.Form):
         self.helper.add_input(Submit('submit', 'Submit'))
 
 
-class EquipmentandConsumablesPurchaseForm(forms.ModelForm, BootstrapMixin):
-    paid_in_full = forms.BooleanField(required=False)
-    data = forms.CharField(widget=forms.HiddenInput)
-    warehouse = forms.ModelChoiceField(models.WareHouse.objects.all())
-    class Meta:
-        model = Bill
-        exclude = 'entry', 
-        widgets = {
-            'vendor': Select2Widget,
-            'memo': forms.Textarea(attrs={'rows': 4})
-        }
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Row(
-                Column(
-                    Row(
-                        Column('date', css_class='col-6'),
-                        Column('due', css_class='col-6'),
-                    ),  'vendor',css_class='col-6'),
-                Column('reference', 'warehouse', 'paid_in_full',
-                    css_class='col-6')
-                ),
-                'memo',
-                'data',
-                HTML("""
-                    <div id='purchase-table'></div>
-                    {% load render_bundle from webpack_loader %}
-                    {% render_bundle 'inventory' %}
-                    """)
-            
-        )
-        self.helper.add_input(Submit('submit', 'Submit'))

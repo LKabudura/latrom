@@ -16,7 +16,6 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django_filters.views import FilterView
 from rest_framework import generics, viewsets
 
-from accounting.forms import TaxForm
 from common_data.utilities import ConfigMixin, ContextMixin, MultiPageDocument
 from common_data.views import PaginationMixin, PDFDetailView
 from invoicing import filters, forms, serializers

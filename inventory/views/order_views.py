@@ -27,10 +27,9 @@ from wkhtmltopdf.views import PDFTemplateView
 from common_data.forms import SendMailForm
 from common_data.models import GlobalConfig
 from common_data.utilities import *
-from common_data.views import PaginationMixin, EmailPlusPDFView, PDFDetailView
+from common_data.views import PaginationMixin, PDFDetailView
 from inventory import filters, forms, models, serializers
 from invoicing.models import SalesConfig
-from accounting.models import Expense, JournalEntry, Account, Journal
 
 from .common import CREATE_TEMPLATE
 
@@ -246,13 +245,6 @@ class OrderPDFView(ConfigMixin, MultiPageDocument, PDFTemplateView):
         context['object'] = models.Order.objects.get(pk=self.kwargs['pk'])
         return context
 
-class OrderEmailSendView(ConfigMixin, EmailPlusPDFView):
-    inv_class = models.Order
-    pdf_template_name = os.path.join("inventory", "order",
-            'pdf.html')
-    success_url = reverse_lazy('inventory:order-list')
-    
-
 class ShippingCostDetailView(DetailView):
     # TODO test
     template_name = os.path.join("inventory", "order", "shipping_list.html")
@@ -272,30 +264,6 @@ class ShippingAndHandlingView(
         return {
             'reference': 'ORD{}'.format(self.kwargs['pk'])
         }
-    
-    def form_valid(self, form):
-        resp =  super().form_valid(form)
-        entry = JournalEntry.objects.create(
-            date=form.cleaned_data['date'], 
-            memo=form.cleaned_data['description'], 
-            journal=Journal.objects.get(pk=2),#disbursements
-            created_by=form.cleaned_data['recorded_by'],
-            draft=False
-        )
-        # the unit cost changes but the journal entry for the cost 
-        # of the order remains the same
-        entry.simple_entry(
-            form.cleaned_data['amount'],
-            Account.objects.get(pk=1000),
-            Account.objects.get(pk=4009)
-            )
-        
-        order = models.Order.objects.get(pk=self.kwargs['pk'])
-        order.shipping_cost_entries.add(entry)
-        order.save()
-
-
-        return resp
 
     
 class DebitNoteCreateView(CreateView):

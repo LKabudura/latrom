@@ -13,7 +13,6 @@ from django.views.generic import DetailView, TemplateView
 from django.views.generic.edit import CreateView, FormView
 from wkhtmltopdf.views import PDFTemplateView
 import urllib
-from accounting.models import Credit, Debit
 from common_data.utilities import (ContextMixin, 
                                     extract_period,
                                     encode_period,
@@ -27,10 +26,8 @@ from invoicing.models.invoice import Invoice
 from .report_utils.plotters import (plot_sales, 
                                     plot_sales_by_customer,
                                     plot_sales_by_products_and_services,
-                                    plot_ar_by_customer,
                                     plot_ar_by_aging)
 from inventory.models import InventoryItem
-from services.models import Service
 
 
 import pygal
@@ -49,97 +46,6 @@ class CustomerReportFormView(ContextMixin, FormView):
                 'customer': self.kwargs['pk']
         } 
         return {}
-
-
-class CustomerStatement(ConfigMixin, 
-                        MultiPageDocument, 
-                        PeriodReportMixin, 
-                        TemplateView):
-    template_name = os.path.join('invoicing', 'reports', 'customer_statement.html')
-    page_length=20
-
-    def get_multipage_queryset(self):
-        kwargs = self.request.GET
-        customer = models.Customer.objects.get(
-            pk=kwargs['customer'])
-        
-        start, end = extract_period(kwargs)
-        
-        credits = Credit.objects.filter(
-            Q(entry__date__gte=start) & 
-            Q(entry__date__lte=end) &
-            Q(account=customer.account)
-        ).order_by('pk')
-        debits = Debit.objects.filter(
-            Q(entry__date__gte=start) & 
-            Q(entry__date__lte=end) &
-            Q(account=customer.account)
-        ).order_by('pk')
-
-        return sorted(itertools.chain(debits, credits), key=lambda t: t.entry.date)
-
-
-    @staticmethod 
-    def common_context(context, customer, start, end):
-        
-        context.update({
-            'customer': customer,
-            'start': start.strftime("%d %B %Y"),
-            'end': end.strftime("%d %B %Y"),
-             'balance_brought_forward': customer.account.balance_on_date(start),
-            'balance_at_end_of_period': customer.account.balance_on_date(end)
-        })
-        return context
-
-    def get_context_data(self, *args, **kwargs):
-        context = super(CustomerStatement, self).get_context_data(*args, **kwargs)
-
-        kwargs = self.request.GET
-        customer = models.Customer.objects.get(
-            pk=kwargs['customer'])
-        
-        start, end = extract_period(kwargs)
-        
-        context['pdf_link'] = True
-        return CustomerStatement.common_context(context, customer, start, end)
-        
-class CustomerStatementPDFView(ConfigMixin, MultiPageDocument,PDFTemplateView):
-    template_name = CustomerStatement.template_name
-    file_name ="customer_statement.pdf"
-
-    page_length=20
-
-    def get_multipage_queryset(self):
-        start = datetime.datetime.strptime(urllib.parse.unquote(
-            self.kwargs['start']), "%d %B %Y")
-        end = datetime.datetime.strptime(urllib.parse.unquote(
-            self.kwargs['end']), "%d %B %Y")
-        customer = models.Customer.objects.get(pk=self.kwargs['customer'])
-        
-        
-        credits = Credit.objects.filter(
-            Q(entry__date__gte=start) & 
-            Q(entry__date__lte=end) &
-            Q(account=customer.account)
-        ).order_by('pk')
-        debits = Debit.objects.filter(
-            Q(entry__date__gte=start) & 
-            Q(entry__date__lte=end) &
-            Q(account=customer.account)
-        ).order_by('pk')
-
-        return sorted(itertools.chain(debits, credits), key=lambda t: t.entry.date)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        start = datetime.datetime.strptime(urllib.parse.unquote(
-            self.kwargs['start']), "%d %B %Y")
-        end = datetime.datetime.strptime(urllib.parse.unquote(
-            self.kwargs['end']), "%d %B %Y")
-        customer = models.Customer.objects.get(pk=self.kwargs['customer'])
-        return CustomerStatement.common_context(context, customer, start, end)
-        
-
 
 
 class InvoiceAgingReport(ConfigMixin, MultiPageDocument, TemplateView):
@@ -266,50 +172,6 @@ class SalesReportPDFView(ConfigMixin, PDFTemplateView):
         return SalesReportView.common_context(context, start, end)
         
 #Do not paginate!
-class AccountsReceivableDetailReportView(ContextMixin, 
-                                         ConfigMixin, 
-                                         TemplateView):
-    extra_context = {
-        'pdf_link': True
-    }
-    template_name = os.path.join('invoicing', 'reports', 'accounts_receivable', 
-        'report.html')
-
-    @staticmethod
-    def common_context(context):
-        invs = Invoice.objects.filter(status__in=['invoice', 'paid-partially'], 
-            draft=False)
-        context["current"] = list(filter(lambda x: x.overdue_days == 0, invs))
-        context['week'] = list(filter(
-            lambda x: x.overdue_days > 0 and x.overdue_days < 7, invs))
-        context['week_two'] = list(filter(
-            lambda x: x.overdue_days > 6 and x.overdue_days < 15, invs))
-        context['month'] = list(filter(
-            lambda x: x.overdue_days > 14 and x.overdue_days < 31, invs))
-        context['two_months'] = list(filter(
-            lambda x: x.overdue_days > 30 and x.overdue_days < 61, invs))
-        context['more'] = list(filter(
-            lambda x: x.overdue_days > 60, invs))
-
-        context['ar_by_customer'] = plot_ar_by_customer()
-        context['ar_by_aging'] = plot_ar_by_aging()
-        context['date'] = datetime.date.today()
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        AccountsReceivableDetailReportView.common_context(context)
-
-
-        return context
-
-class AccountsReceivableReportPDFView(ConfigMixin, PDFTemplateView):
-    template_name = AccountsReceivableDetailReportView.template_name
-    
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        AccountsReceivableDetailReportView.common_context(context)
-        return context
-    
 
 
 class SalesByCustomerReportFormView(ContextMixin, FormView):

@@ -23,14 +23,12 @@ from common_data.utilities import *
 from common_data.views import PaginationMixin
 from inventory import filters, forms, models, serializers
 from invoicing.models import SalesConfig
-from services.models import EquipmentRequisition
 from inventory.views.dash_plotters import single_item_composition_plot
 
 from .common import CREATE_TEMPLATE
 import openpyxl
 import csv
 from invoicing.models import SalesConfig
-from accounting.models import BillLine, Expense, BillPayment, Account
 
 class ProductAPIView(ModelViewSet):
     queryset = models.InventoryItem.objects.filter(type=0)
@@ -327,54 +325,6 @@ class EquipmentCreateView( ContextMixin,
             'type': 1# for equipment
         }
 
-
-class EquipmentandConsumablesPurchaseView(ContextMixin, CreateView):
-    """
-    Creates a bill
-    form includes: date, vendor, account 
-    generic table includes: equipment, quantity, """
-    template_name = os.path.join('common_data', 'crispy_create_template.html')
-    form_class = forms.EquipmentandConsumablesPurchaseForm
-    extra_context = {
-        'title': 'Record Purchase of Equipment and Consumables'
-    }
-
-    def form_valid(self, form):
-        resp = super().form_valid(form)
-
-        data = json.loads(urllib.parse.unquote(form.cleaned_data['data']))
-        warehouse = form.cleaned_data['warehouse']
-        for line in data:
-            exp = Expense.objects.create(
-                debit_account=self.object.vendor.account,
-                date=self.object.date,
-                description=f"{line['quantity']} x {line['item']} "
-                            f"@ ${line['unit_price']}"
-                            f"{line['unit'].split('-')[-1]}",
-                amount=line['lineTotal'],
-                category=7
-            )
-            BillLine.objects.create(
-                bill=self.object,
-                expense= exp
-            )
-
-            #increment inventory
-            item_pk = line['item'].split('-')[0]
-            item = models.InventoryItem.objects.get(pk=item_pk)
-            warehouse.add_item(item, line['quantity'])
-
-        if form.cleaned_data['paid_in_full']:
-            pmt = BillPayment.objects.create(
-                date=self.object.date,
-                account=Account.objects.get(pk=1000),
-                bill=self.object,
-                amount=self.object.total,
-            )
-            pmt.create_entry()
-
-
-        return resp 
 
 ####################################################
 #                Raw Material Views                #

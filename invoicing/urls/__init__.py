@@ -34,19 +34,11 @@ customer_urls = [
         name='customer-member-add'),
 ] + customer_router.urls
 
-sales_rep_router = DefaultRouter()
-sales_rep_router.register(r'api/sales-rep', views.SalesRepsAPIViewSet, base_name='sales-rep')
 
-sales_rep_urls = [
-    re_path(r'^create-sales-rep$', views.SalesRepCreateView.as_view(), name='create-sales-rep'),
-    re_path(r'^update-sales-rep/(?P<pk>[\w]+)$', views.SalesRepUpdateView.as_view(), name='update-sales-rep'),
-    re_path(r'^delete-sales-rep/(?P<pk>[\w]+)$', views.SalesRepDeleteView.as_view(), name='delete-sales-rep'),
-    re_path(r'^sales-reps-list$', views.SalesRepListView.as_view(), name='sales-reps-list'),
-] + sales_rep_router.urls
 
 urlpatterns = [
     re_path(r'^$', views.Home.as_view(), name="home"),
     re_path(r'^async-dashboard/?$', views.AsyncDashboard.as_view(), name="async-dashboard"),
     re_path(r'^config/(?P<pk>[\d]+)/?$', views.ConfigView.as_view(), name="config"),
     re_path(r'^api/config/(?P<pk>[\d]+)/?$', views.ConfigAPIView.as_view(), name='api-config')
-] + report_urls + customer_urls + sales_rep_urls + invoice_urls
+] + report_urls + customer_urls  + invoice_urls

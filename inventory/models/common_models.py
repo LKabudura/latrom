@@ -9,10 +9,8 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q
 
-from accounting.models import Account, Journal, JournalEntry
 from common_data.models import SingletonModel, SoftDeletionModel
 from inventory.models.item import InventoryItem
-from inventory.schedules import run_inventory_service
 from background_task.models import Task
 from django.shortcuts import reverse
 
@@ -62,20 +60,6 @@ class InventorySettings(SingletonModel):
     #TODO capitalization_limit = models.DecimalField(max_digits=16, decimal_places=2)
     is_configured = models.BooleanField(default=False)
     service_hash = models.CharField(max_length=255, default="", blank=True)
-
-
-class InventoryController(models.Model):
-    '''Model that represents employees with the role of 
-    inventory controller and have the ability to make purchase orders,
-    receive them, transfer inventory between warehouses and perform other 
-    functions.'''
-    employee = models.OneToOneField('employees.Employee', on_delete=models.SET_NULL, null=True, 
-        limit_choices_to=Q(user__isnull=False))
-    can_authorize_equipment_requisitions = models.BooleanField(default=False)
-    can_authorize_consumables_requisitions = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.employee.full_name
 
 
 

@@ -11,7 +11,6 @@ from django.db import models
 from django.db.models import Q
 
 import inventory
-from accounting.models import Account, Journal, JournalEntry
 from common_data.models import SingletonModel, SoftDeletionModel
 
 from .warehouse_models import StorageMedia, WareHouseItem
@@ -22,31 +21,9 @@ class OrderPayment(models.Model):
     order = models.ForeignKey('inventory.order', on_delete=models.SET_NULL, 
         null=True)
     comments = models.TextField()
-    entry = models.ForeignKey('accounting.JournalEntry', 
-        on_delete=models.SET_NULL,
-        blank=True, null=True)
-
-    def create_entry(self, comments=""):
-        if self.entry:
-            return
-        j = JournalEntry.objects.create(
-                memo= 'Auto generated journal entry from order payment.' \
-                    if comments == "" else comments,
-                date=self.date,
-                journal =Journal.objects.get(pk=4),
-                created_by = self.order.issuing_inventory_controller.employee.user,
-                draft=False
-            )
+    
         
-        j.simple_entry(
-            self.amount,
-            Account.objects.get(pk=1000),#cash in checking account
-            self.order.supplier.account,
-        )
-
-        if not self.entry:
-            self.entry = j
-            self.save()
+        
 
 #Note as currently designed it cannot be known when exactly an item entered inventory
 class StockReceipt(models.Model):
@@ -62,10 +39,7 @@ class StockReceipt(models.Model):
     '''
     order = models.ForeignKey('inventory.Order', on_delete=models.SET_NULL, 
         null=True)
-    received_by = models.ForeignKey('inventory.InventoryController', 
-        on_delete=models.SET_NULL, 
-        null=True,
-        default=1)
+    received_by = models.CharField(max_length=64)
     receive_date = models.DateField()
     note =models.TextField(blank=True, default="")
     fully_received = models.BooleanField(default=False)
@@ -88,9 +62,7 @@ class StockReceiptLine(models.Model):
 #might need to rename
 class InventoryCheck(models.Model):
     date = models.DateField()
-    adjusted_by = models.ForeignKey('inventory.InventoryController', 
-        on_delete=models.SET_NULL, 
-        null=True )
+    adjusted_by = models.CharField(max_length=64)
     warehouse = models.ForeignKey('inventory.WareHouse', 
         on_delete=models.SET_NULL, 
         null=True )
@@ -135,11 +107,9 @@ class StockAdjustment(models.Model):
 class TransferOrder(models.Model):
     date = models.DateField()
     expected_completion_date = models.DateField()
-    issuing_inventory_controller = models.ForeignKey('inventory.InventoryController',
-        related_name='issuing_inventory_controller', 
-        on_delete=models.SET_NULL, null=True)
-    receiving_inventory_controller = models.ForeignKey('inventory.InventoryController', 
-        on_delete=models.SET_NULL, null=True)
+    issuing_inventory_controller = models.CharField(max_length=64)
+    receiving_inventory_controller =models.CharField(max_length=64, blank=True, 
+        default='')
     actual_completion_date =models.DateField(null=True)#provided later
     source_warehouse = models.ForeignKey('inventory.WareHouse',
         related_name='source_warehouse', on_delete=models.SET_NULL, null=True,)
@@ -187,8 +157,7 @@ class TransferOrderLine(models.Model):
 
 class InventoryScrappingRecord(models.Model):
     date = models.DateField()
-    controller = models.ForeignKey('inventory.InventoryController', 
-        on_delete=models.SET_NULL, null=True)
+    controller = models.CharField(max_length=64)
     warehouse = models.ForeignKey('inventory.WareHouse', on_delete=models.SET_NULL, null=True)
     comments = models.TextField(blank=True)
 

@@ -3,13 +3,12 @@ from functools import reduce
 from django.db import models
 from decimal import Decimal as D
 
-from accounting.models import Account, Journal, JournalEntry
 from django.shortcuts import reverse
 
 
 class CreditNote(models.Model):
     """A document sent by a seller to a customer notifying them
-    that a credit has been made to their account against goods returned
+    that a credit has been made  against goods returned
     by the buyer. Linked to invoices. Stores a list of products returned.
     
     properties
@@ -18,18 +17,13 @@ class CreditNote(models.Model):
     returned_total - returns the numerical value of the products returned.
     
     methods
-    -----------
-    create_entry - creates a journal entry in the accounting system where
-        the customer account is credited and sales returns is debitted. NB 
-        futher transactions will have to be made if the returned goods 
-        are to be written off."""
+    -----------"""
     
     date = models.DateField()
     invoice = models.ForeignKey('invoicing.Invoice', 
             on_delete=models.SET_NULL, null=True)
     comments = models.TextField()#never allow blank comments
-    entry = models.ForeignKey("accounting.JournalEntry", null=True,
-        on_delete=models.SET_NULL)
+
 
     def get_absolute_url(self):
         return reverse("invoicing:credit-note-detail", kwargs={"pk": self.pk})
@@ -64,24 +58,7 @@ class CreditNote(models.Model):
     def tax_amount(self):
         return self.tax_credit
 
-    def create_entry(self):
-        j = JournalEntry.objects.create(
-            memo=f"Journal entry for credit note #{self.pk}. From Invoice #{self.invoice.invoice_number}",
-            date=self.date,
-            journal=Journal.objects.get(pk=3),
-            draft=False,
-            created_by = self.invoice.salesperson.employee.user
-        )
-
-            
-        j.credit(self.returned_total_with_tax, self.invoice.customer.account)
-        # sales returns 
-        j.debit(self.returned_total, Account.objects.get(pk=4002))
-        # tax account 
-        j.debit(self.tax_credit, Account.objects.get(pk=2001))
-        
-        self.entry = j
-        self.save()
+   
 
 #TODO test
 class CreditNoteLine(models.Model):

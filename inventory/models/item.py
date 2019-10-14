@@ -12,7 +12,6 @@ from django.db.models import Q
 
 import inventory
 import invoicing
-from accounting.models import Account, Journal, JournalEntry
 from common_data.models import SingletonModel, SoftDeletionModel
 from django.shortcuts import reverse
 
@@ -190,10 +189,7 @@ class ProductComponent(models.Model):
     margin = models.DecimalField(max_digits=16, decimal_places=2, default=0)
     markup = models.DecimalField(max_digits=16, decimal_places=2, default=0)
     sku = models.CharField(max_length=16, blank=True)
-    tax = models.ForeignKey('accounting.tax', 
-        blank=True, 
-        null=True, 
-        on_delete=models.SET_NULL)
+    tax = models.FloatField(default=0.0)
     
 
 
@@ -333,6 +329,4 @@ class EquipmentComponent(models.Model):
     ]
     condition = models.CharField(max_length=16, 
         choices=CONDITION_CHOICES, default='excellent')
-    asset_data = models.ForeignKey('accounting.Asset', 
-        on_delete=models.SET_NULL,
-        null=True, blank=True)
+    

@@ -1,6 +1,4 @@
 from common_data.tests.model_util import CommonModelCreator
-from common_data.tests.accounts import create_accounts
-from employees.tests.model_util import EmployeeModelCreator
 from inventory import models 
 import datetime
 
@@ -24,13 +22,9 @@ class InventoryModelCreator():
     def create_supplier(self):
         if not hasattr(self.cls, 'organization'):
             CommonModelCreator(self.cls).create_organization()
-        
-        if not hasattr(self.cls, 'account_c'):
-            create_accounts(self.cls)
 
         self.cls.supplier = models.Supplier.objects.create(
             organization=self.cls.organization,
-            account = self.cls.account_c
             )
 
         return self.cls.supplier
@@ -166,14 +160,3 @@ class InventoryModelCreator():
             order=self.cls.order,
             comments='Comment'
         )
-
-    def create_inventory_controller(self):
-        if hasattr(self.cls, 'controller'):
-            return self.cls.controller
-        if not hasattr(self.cls, 'employee'):
-            EmployeeModelCreator(self.cls).create_employee()
-
-        self.cls.controller = models.InventoryController.objects.create(
-            employee=self.cls.employee
-        )
-        return self.cls.controller

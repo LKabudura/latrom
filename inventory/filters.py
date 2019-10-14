@@ -52,12 +52,6 @@ class UnitFilter(django_filters.FilterSet):
         }
 
 
-class ControllerFilter(django_filters.FilterSet):
-    class Meta:
-        model = InventoryController
-        fields = {
-            'employee': ['exact'],
-        }
 
 
 class InventoryItemFilter(django_filters.FilterSet):

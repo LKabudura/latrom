@@ -30,16 +30,7 @@ urlpatterns = [
     re_path(r'^category-detail/(?P<pk>[\d]+)/?$', views.CategoryDetailView.as_view(), 
         name="category-detail"),
     re_path(r'api/category/?', views.CategoryListAPIView.as_view()),
-    re_path(r'^config/(?P<pk>[\d]+)/?$', views.ConfigView.as_view(), name="config"),
-    re_path(r'^inventory-controller-list/?$', 
-        views.InventoryControllerListView.as_view(), 
-            name='inventory-controller-list'),
-    re_path(r'^create-inventory-controller/?$', 
-        views.InventoryControllerCreateView.as_view(), 
-            name='create-inventory-controller'),
-    re_path(r'^update-inventory-controller/(?P<pk>[\d]+)/?$', 
-        views.InventoryControllerUpdateView.as_view(), 
-            name='update-inventory-controller'),
+    re_path(r'^config/(?P<pk>[\d]+)/?$', views.ConfigView.as_view(), name="config")
 ] 
 urlpatterns += item_urls
 urlpatterns += inventory_management_urls

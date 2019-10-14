@@ -17,7 +17,7 @@ from wkhtmltopdf.views import PDFTemplateView
 from common_data.forms import SendMailForm
 from common_data.models import GlobalConfig
 from common_data.utilities import ConfigMixin, ContextMixin, MultiPageDocument
-from common_data.views import EmailPlusPDFView, PaginationMixin
+from common_data.views import  PaginationMixin
 from invoicing import filters, forms, serializers
 from invoicing.models import *
 from invoicing.views.invoice_views.util import InvoiceCreateMixin
@@ -116,11 +116,6 @@ class QuotationPDFView(ConfigMixin, MultiPageDocument, PDFTemplateView):
         context['object'] = Invoice.objects.get(pk=self.kwargs['pk'])
         return context
 
-class QuotationEmailSendView(EmailPlusPDFView):
-    inv_class = Invoice
-    success_url = reverse_lazy('invoicing:invoice-list')
-    pdf_template_name = os.path.join("invoicing", "quotation",
-            'pdf.html')
 
 def make_invoice_from_quotation(request, pk=None):
     inv = get_object_or_404(Invoice, pk=pk)

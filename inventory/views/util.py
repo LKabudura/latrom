@@ -2,7 +2,6 @@ import datetime
 from dateutil.relativedelta import relativedelta
 import inventory
 from django.db.models import Q 
-from planner.models import Event, EventParticipant
 
 class InventoryConfigMixin(object):
     def get_context_data(self, *args, **kwargs):

@@ -8,19 +8,15 @@ from django.test.client import RequestFactory
 from django.urls import reverse
 from django.utils import timezone
 
-from accounting.models import Account, JournalEntry, Tax
 from common_data.models import Organization
-from common_data.tests import create_account_models, create_test_user, create_test_common_entities
+from common_data.tests import  create_test_user, create_test_common_entities
 from inventory import models
 from django.contrib.auth.models import User
 
 from .models import create_test_inventory_models
 from .model_util import InventoryModelCreator
-from employees.tests.model_util import EmployeeModelCreator
 from inventory import models
-from employees.models import Employee
 import copy
-from messaging.models import UserProfile
 
 TODAY = datetime.date.today()
 from inventory.views import (InventoryReportPDFView,
@@ -33,8 +29,8 @@ from inventory.views import (InventoryReportPDFView,
         
 
 class CommonViewTests(TestCase):
-    fixtures = ['accounts.json','employees.json','common.json', 
-    'invoicing.json','journals.json', 'inventory.json']
+        fixtures = ['common.json', 'invoicing.json', 'inventory.json']
+
 
     @classmethod
     def setUpClass(cls):
@@ -53,12 +49,9 @@ class CommonViewTests(TestCase):
         }
     @classmethod
     def setUpTestData(cls):
-        create_account_models(cls)
         create_test_user(cls)
         create_test_inventory_models(cls)
         create_test_common_entities(cls)
-        EmployeeModelCreator(cls).create_employee()
-        
         
     def setUp(self):
         self.client.login(username='Testuser', password='123')
@@ -151,29 +144,11 @@ class CommonViewTests(TestCase):
             kwargs={'pk': 1}))
         self.assertEqual(resp.status_code, 200)
 
-    def test_get_inventory_controller_create_page(self):
-        resp = self.client.get(reverse('inventory:create-inventory-controller'))
-        self.assertEqual(resp.status_code, 200)
-
-    def test_post_inventory_controller_create_page(self):
-        resp = self.client.post(reverse(
-            'inventory:create-inventory-controller'), 
-                data={
-                    'employee': self.employee.pk,
-                    'can_authorize_equipment_requisitions': True,
-                    'can_authorize_consumables_requisitions': True
-                })
-        
-        self.assertEqual(resp.status_code, 302)
-
-    def test_inventory_controller_list_page(self):
-        resp = self.client.get(reverse('inventory:inventory-controller-list'))
-        self.assertEqual(resp.status_code, 200)
+    
 
 
 class InventoryManagementViewTests(TestCase):
-    fixtures = ['accounts.json','employees.json','common.json', 
-    'invoicing.json','journals.json', 'inventory.json']
+    fixtures = ['common.json', 'invoicing.json', 'inventory.json']
 
     @classmethod
     def setUpClass(cls):
@@ -182,7 +157,6 @@ class InventoryManagementViewTests(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        create_account_models(cls)
         create_test_user(cls)
         create_test_inventory_models(cls)
         create_test_common_entities(cls)
@@ -285,8 +259,8 @@ class InventoryManagementViewTests(TestCase):
 
 
 class ItemViewTests(TestCase):
-    fixtures = ['accounts.json','employees.json','common.json', 
-    'invoicing.json','journals.json', 'inventory.json']
+        fixtures = ['common.json', 'invoicing.json', 'inventory.json']
+
 
     @classmethod
     def setUpClass(cls):
@@ -330,7 +304,6 @@ class ItemViewTests(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        create_account_models(cls)
         create_test_user(cls)
         create_test_inventory_models(cls)
         create_test_common_entities(cls)
@@ -488,8 +461,8 @@ class ItemViewTests(TestCase):
 
 
 class OrderViewTests(TestCase):
-    fixtures = ['accounts.json','employees.json','common.json', 
-    'invoicing.json','journals.json', 'inventory.json']
+        fixtures = ['common.json', 'invoicing.json', 'inventory.json']
+
 
     @classmethod
     def setUpClass(cls):
@@ -518,7 +491,6 @@ class OrderViewTests(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        create_account_models(cls)
         create_test_user(cls)
         create_test_inventory_models(cls)
         create_test_common_entities(cls)
@@ -700,8 +672,8 @@ class OrderViewTests(TestCase):
 
 
 class SupplierViewTests(TestCase):
-    fixtures = ['accounts.json','employees.json','common.json', 
-    'invoicing.json','journals.json', 'inventory.json']
+        fixtures = ['common.json', 'invoicing.json', 'inventory.json']
+
 
     @classmethod
     def setUpClass(cls):
@@ -710,7 +682,6 @@ class SupplierViewTests(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        create_account_models(cls)
         create_test_user(cls)
         create_test_inventory_models(cls)
         create_test_common_entities(cls)
@@ -809,8 +780,8 @@ class SupplierViewTests(TestCase):
 
 
 class WarehouseViewTests(TestCase):
-    fixtures = ['accounts.json','employees.json','common.json', 
-    'invoicing.json','journals.json', 'inventory.json']
+        fixtures = ['common.json', 'invoicing.json', 'inventory.json']
+
 
     @classmethod
     def setUpClass(cls):
@@ -840,7 +811,6 @@ class WarehouseViewTests(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        create_account_models(cls)
         create_test_user(cls)
         create_test_inventory_models(cls)
         create_test_common_entities(cls)
@@ -915,8 +885,8 @@ class WarehouseViewTests(TestCase):
 
 
 class ReportViewTests(TestCase):
-    fixtures = ['accounts.json','employees.json','common.json', 
-    'invoicing.json','journals.json', 'inventory.json']
+        fixtures = ['common.json', 'invoicing.json', 'inventory.json']
+
 
     @classmethod
     def setUpClass(cls):
@@ -925,7 +895,6 @@ class ReportViewTests(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        create_account_models(cls)
         create_test_user(cls)
         create_test_inventory_models(cls)
         create_test_common_entities(cls)
@@ -1008,8 +977,8 @@ class ReportViewTests(TestCase):
         self.assertEqual(resp.status_code, 200)
 
 class TransferViewTests(TestCase):
-    fixtures = ['accounts.json','employees.json','common.json', 
-    'invoicing.json','journals.json', 'inventory.json']
+    fixtures = ['common.json', 'invoicing.json', 'inventory.json']
+
 
     @classmethod
     def setUpClass(cls):
@@ -1039,7 +1008,6 @@ class TransferViewTests(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        create_account_models(cls)
         create_test_user(cls)
         create_test_inventory_models(cls)
         create_test_common_entities(cls)
@@ -1083,8 +1051,8 @@ class TransferViewTests(TestCase):
 
 
 class ConfigWizardTests(TestCase):
-    fixtures = ['common.json', 'journals.json', 'settings.json', 'accounts.json']
-
+    fixtures = ['common.json', 'invoicing.json', 'inventory.json']
+    
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -1108,18 +1076,8 @@ class ConfigWizardTests(TestCase):
             '0-inventory_valuation_method': 1
         }
 
-        employee_data = {
-            '1-first_name': 'first',
-            '1-last_name': 'last',
-            '1-leave_days': 1,
-            '1-pin': 1000,
-            'config_wizard-current_step': 1,
-        }
-
-        controller_data = {
-            'config_wizard-current_step': 2,
-            '2-employee': 1
-        }
+        
+        
 
         warehouse_data = {
             'config_wizard-current_step': 3,
@@ -1136,7 +1094,7 @@ class ConfigWizardTests(TestCase):
             '4-name': 'caleb kandoro'
         }
 
-        data_list = [config_data, employee_data, controller_data, 
+        data_list = [config_data, controller_data, 
             warehouse_data, supplier_data]
 
         for step, data in enumerate(data_list, 1):

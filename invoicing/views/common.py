@@ -17,15 +17,12 @@ from django.views.generic import DetailView, FormView, ListView, TemplateView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from rest_framework import generics, viewsets
 
-from accounting.forms import TaxForm
 from common_data.utilities import ContextMixin, ConfigMixin, ConfigWizardBase
 from invoicing import filters, forms, serializers
 from invoicing.models import *
 from invoicing.views.report_utils import plotters
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-from employees.models import Employee
-from employees.forms import EmployeeForm
 
 class SalesConfigMixin(object):
     def get_context_data(self, **kwargs):
@@ -88,21 +85,13 @@ class ConfigAPIView(generics.RetrieveAPIView):
     queryset = SalesConfig.objects.all()
     serializer_class = serializers.ConfigSerializer
 
-def employee_condition(self):
-    return Employee.objects.all().count() == 0
 
 class ConfigWizard(ConfigWizardBase):
     template_name = os.path.join('invoicing', 'wizard.html')
     form_list = [
         forms.SalesConfigForm, 
         forms.CustomerForm, 
-        EmployeeForm,
-        forms.SalesRepForm
     ]
-
-    condition_dict = {
-        '2' : employee_condition
-    }
 
     file_storage = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'logo'))
 

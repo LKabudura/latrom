@@ -5,7 +5,6 @@ from django.db import models
 from django.db.models import Q
 
 import inventory
-from accounting.models import Account
 
 from invoicing.models.invoice import Invoice
 from invoicing.models.payment import Payment
@@ -14,8 +13,7 @@ from common_data.models import  SoftDeletionModel
 class Customer(SoftDeletionModel):
     '''The customer model represents business clients to whom products are 
     sold. Customers are typically businesses and the fields reflect that 
-    likelihood. Individuals however can also be represented.
-    Customers can have accounts if store credit is extended to them.'''
+    likelihood. Individuals however can also be represented.'''
     #make sure it can only be one or the other not both
     organization = models.OneToOneField('common_data.Organization', null=True,  
         on_delete=models.CASCADE, blank=True, unique=True)
@@ -23,8 +21,7 @@ class Customer(SoftDeletionModel):
         on_delete=models.CASCADE, blank=True,)    
     billing_address = models.TextField(default= "", blank=True)
     banking_details = models.TextField(default= "", blank=True)
-    account = models.ForeignKey('accounting.Account', on_delete=models.CASCADE,
-        null=True)#created in save method
+
 
     @property
     def invoices(self):
@@ -52,23 +49,7 @@ class Customer(SoftDeletionModel):
     def __str__(self):
         return self.name
 
-    def create_customer_account(self):
-        n_customers = Customer.objects.all().count() + 1
-        self.account = Account.objects.create(
-                name= "Customer: %s" % self.name,
-                balance =0,
-                id= 1100 + n_customers,
-                type = 'asset',
-                description = 'Account which represents credit extended to a customer',
-                balance_sheet_category='current-assets',
-                parent_account=Account.objects.get(pk=1003)#trade receivables
-            )
-
-    def save(self, *args, **kwargs):
-        if self.account is None:
-            self.create_customer_account()
-        super(Customer, self).save(*args, **kwargs)
-
+   
     @property
     def credit_invoices(self):
         return [i for i in self.invoices \

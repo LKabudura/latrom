@@ -69,7 +69,6 @@ def plot_sales_by_products_and_services(start, end):
         Q(invoice__date__gte=start) & 
         Q(invoice__date__lte=end) &
         Q(invoice__draft=False) &
-        Q(expense__isnull=True) &
         Q(invoice__status__in=['paid', 'paid-partially', 'invoice']))
 
     sbps = {}
@@ -172,17 +171,7 @@ def pygal_date_formatter(start, end):
 
     return [d.strftime(formatter) for d in dates]
 
-def plot_ar_by_customer():
-    chart = pygal.Pie(print_values=True, style=DefaultStyle(
-        value_font_size=30, 
-        value_colors=('white', )
-        ) 
-    )
-    chart.title = 'A/R By Customer'
-    for cus in Customer.objects.filter(account__balance__gt=0):
-        chart.add(str(cus), cus.total_accounts_receivable)
 
-    return chart.render(is_unicode=True)
 
 def plot_ar_by_aging():
     chart = pygal.Pie(print_values=True, style=DefaultStyle(

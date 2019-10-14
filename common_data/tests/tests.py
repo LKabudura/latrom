@@ -13,9 +13,7 @@ from common_data.utilities import (
     time_choices)
 import responses
 import requests
-import services
 from common_data.tasks import license_verification_func
-from services.tests.model_util import ServiceModelCreator
 
 class ModelTests(TestCase):
     @classmethod 
@@ -294,7 +292,7 @@ class ViewTests(TestCase):
         self.assertEqual(resp.status_code, 200)
 
 class UtilityTests(TestCase):
-    fixtures = ['common.json','accounts.json', 'employees.json', 'invoicing.json']
+    fixtures = ['common.json', 'invoicing.json']
 
     def test_config_mixin(self):
         class ConfigChild(ConfigMixin):

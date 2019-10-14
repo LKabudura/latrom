@@ -329,11 +329,6 @@ class CreateMultipleCustomersView(FormView):
                     individual=ind
                 )
 
-            
-            
-            if line['account_balance']:
-                    cus.account.balance = line['account_balance']
-                    cus.account.save()
 
         return resp
 
@@ -366,7 +361,6 @@ class ImportCustomersView(ContextMixin, FormView):
                 form.cleaned_data['address'],
                 form.cleaned_data['type'],
                 form.cleaned_data['email'],
-                form.cleaned_data['account_balance'],
             ]
             wb = openpyxl.load_workbook(file.file)
             try:
@@ -404,10 +398,5 @@ class ImportCustomersView(ContextMixin, FormView):
                     )
                     
                     
-                    if row[form.cleaned_data['account_balance'] -1].value:
-                        cus.account.balance = row[
-                            form.cleaned_data['account_balance'] -1].value
-                    
-                        cus.account.save()
                 
         return resp

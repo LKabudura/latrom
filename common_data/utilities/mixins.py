@@ -7,7 +7,6 @@ from django.http import HttpResponse
 from django.views.generic import DetailView, ListView, View
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from common_data import models
-import messaging
 import invoicing
 from latrom import settings
 from .functions import apply_style, PeriodSelectionException
@@ -44,28 +43,6 @@ class PeriodReportMixin(View):
             return HttpResponse(f'<h3>{e}</h3>')
 
 
-class ContactsMixin(object):
-    '''Contacts mixin is a utility class used to extract email addresses and phone numbers from text fields in places where it is inconvenient to rename a foreign key'''
-    email_fields = []
-    phone_fields = []
-
-    def save(self, *args, **kwargs):
-        ret = super().save(*args, **kwargs)
-        for field in self.email_fields:
-            address = self.__getattribute__(field)
-            if address and address != "":
-                if not messaging.models.EmailAddress.objects.filter(
-                        address=address).exists():
-                    messaging.models.EmailAddress.objects.create(
-                        address=address)
-
-        for field in self.phone_fields:
-            number = self.__getattribute__(field)
-            if number and number != "":
-                if not models.PhoneNumber.objects.filter(number=number).exists():
-                    models.PhoneNumber.objects.create(number=number)
-
-        return ret
 
 
 class AutomatedServiceMixin(object):#not really a mixin
@@ -73,10 +50,7 @@ class AutomatedServiceMixin(object):#not really a mixin
 
     DEFAULT_CONFIG = {
                     'inventory': False,
-                    'employees': False,
-                    'accounting': False,
                     'common': False,
-                    'messaging': False
                 }
     '''
     Ensures the service is only run once per day. Especially for servers 

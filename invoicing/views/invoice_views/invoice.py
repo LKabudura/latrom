@@ -17,7 +17,7 @@ from wkhtmltopdf.views import PDFTemplateView
 from common_data.forms import SendMailForm
 from common_data.models import GlobalConfig
 from common_data.utilities import ConfigMixin, ContextMixin, MultiPageDocument
-from common_data.views import EmailPlusPDFView, PaginationMixin
+from common_data.views import  PaginationMixin
 from invoicing import filters, forms, serializers
 from invoicing.models import *
 from invoicing.views.invoice_views.util import InvoiceCreateMixin
@@ -28,7 +28,6 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 import csv
 import openpyxl
-from services.models import Service
 from inventory.models import InventoryItem,ProductComponent, UnitOfMeasure
 
 def process_data(items, inv):
@@ -213,11 +212,6 @@ class InvoicePDFView(ConfigMixin, MultiPageDocument, PDFTemplateView):
         context['object'] = Invoice.objects.get(pk=self.kwargs['pk'])
         return context
 
-class InvoiceEmailSendView(ConfigMixin, EmailPlusPDFView):
-    inv_class = Invoice
-    success_url = reverse_lazy('invoicing:invoices-list')
-    pdf_template_name = os.path.join("invoicing", "invoice",
-            'pdf.html')
 
 class InvoiceDraftDeleteView( DeleteView):
     template_name = os.path.join('common_data', 'delete_template.html')
@@ -282,27 +276,7 @@ class ShippingAndHandlingView(
         return {
             'reference': 'SINV{}'.format(self.kwargs['pk'])
         }
-    
-    def form_valid(self, form):
-        resp =  super().form_valid(form)
-
-        invoice = Invoice.objects.get(pk=self.kwargs['pk'])
-
-
-        expense = Expense.objects.create(
-            category=14,
-            amount=form.cleaned_data['amount'],
-            description=form.cleaned_data['description'],
-            debit_account=Account.objects.get(pk=1000),#cash
-            recorded_by=form.cleaned_data['recorded_by'],
-            date=form.cleaned_data['date']
-        )
-
-        expense.create_entry()
-        invoice.shipping_expenses.add(expense)
-        invoice.save()#necessary?
-
-        return resp
+   
 
 class ShippingExpenseListView(DetailView):
     model = Invoice

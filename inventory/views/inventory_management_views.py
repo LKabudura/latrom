@@ -25,8 +25,6 @@ from common_data.utilities import *
 from common_data.views import PaginationMixin, PDFDetailView
 from inventory import filters, forms, models, serializers
 from invoicing.models import SalesConfig
-from accounting.models import Account, Journal, JournalEntry
-
 
 #######################################################
 #               Inventory Check Views                 #
@@ -229,22 +227,10 @@ class StockReceiptCreateView(CreateView):
             subtotal += item.order_price * D(n)
         # Only credit supplier account the money we owe them for received 
         # inventory
-        tax = subtotal * (D(self.object.order.tax.rate) / D(100))
+        tax = subtotal * (D(self.object.order.tax) / D(100))
         total = subtotal + tax
-        entry = JournalEntry.objects.create(
-            date = self.object.receive_date,
-            memo = f"Order {self.object.order.pk} received ",
-            journal = Journal.objects.get(pk=4),
-            created_by = self.object.order.issuing_inventory_controller.employee.user,
-            draft=False
-        )
+        
 
-        if not self.object.order.supplier.account:
-            self.object.order.supplier.create_account()
-            
-        entry.credit(total, self.object.order.supplier.account)
-        entry.debit(subtotal, Account.objects.get(pk=4006))#purchases
-        entry.debit(tax, Account.objects.get(pk=2001))#tax
         
         return resp 
 

@@ -7,7 +7,6 @@ from decimal import Decimal as D
 from django.db import models
 from django.db.models import Q
 
-from accounting.models import Account
 from common_data.models import  SoftDeletionModel
 from inventory.models.item import InventoryItem
 from inventory.models.item_management import StockReceipt
@@ -26,9 +25,6 @@ class Supplier(SoftDeletionModel):
     individual = models.OneToOneField('common_data.Individual', 
         on_delete=models.SET_NULL, blank=True, 
         null=True)
-    account = models.ForeignKey('accounting.Account', 
-        on_delete=models.SET_NULL, 
-        blank=True, null=True)
     banking_details=models.TextField(blank=True, default="")
     billing_address=models.TextField(blank=True, default="")
 
@@ -112,22 +108,4 @@ class Supplier(SoftDeletionModel):
 
         return 0
 
-    def create_account(self):
-        if self.account is None:
-            n_suppliers = Supplier.objects.all().count()
-            #will overwrite if error occurs
-            self.account = Account.objects.create(
-                name= "Vendor: %s" % self.name,
-                id = 2100 + n_suppliers + 1, # the + 1 for the default supplier
-                balance =0,
-                type = 'liability',
-                description = 'Account which represents debt owed to a Vendor',
-                balance_sheet_category='current-liabilities',
-                parent_account= Account.objects.get(pk=2000)# trade payables
-            )
-    
-    def save(self, *args, **kwargs):
-        if self.account is None:
-            self.create_account()
-        super().save(*args, **kwargs)
-
+   

@@ -1,9 +1,6 @@
 from invoicing.models import *
 from common_data.tests.model_util import CommonModelCreator
-from services.tests.model_util import ServiceModelCreator
 from inventory.tests.model_util import InventoryModelCreator
-import accounting
-from employees.tests.model_util import EmployeeModelCreator
 
 class InvoicingModelCreator():
     def __init__(self, klass):
@@ -14,8 +11,6 @@ class InvoicingModelCreator():
         self.create_credit_note_line()
         self.create_customer_ind()
         self.create_customer_org()
-        self.create_expense_line()
-        self.create_expense_line_component()
         self.create_invoice()
         self.create_quotation()
         self.create_payment()
@@ -126,17 +121,7 @@ class InvoicingModelCreator():
 
         return self.cls.service_line_component
 
-    def create_expense_line_component(self):
-        if not hasattr(self.cls, 'expense'):
-            amc = accounting.tests.model_util.AccountingModelCreator(self.cls)
-            amc.create_expense()
 
-        self.cls.expense_line_component = ExpenseLineComponent.objects.create(
-            expense=self.cls.expense,
-            price=self.cls.expense.amount
-        )
-
-        return self.cls.expense_line_component
 
     def create_product_line(self):
         if hasattr(self.cls, 'product_line'):
@@ -173,19 +158,6 @@ class InvoicingModelCreator():
 
         return self.cls.service_line
 
-    def create_expense_line(self):
-        if not hasattr(self.cls, 'invoice'):
-            self.create_invoice()
-        if not hasattr(self.cls, 'expense_line_component'):
-            self.create_expense_line_component()
-
-        self.cls.expense_line = InvoiceLine.objects.create(
-            invoice=self.cls.invoice,
-            expense=self.cls.expense_line_component,
-            line_type=3
-        )
-
-        return self.cls.expense_line
 
     def create_payment(self):
         if not hasattr(self.cls, 'invoice'):
@@ -226,16 +198,4 @@ class InvoicingModelCreator():
 
         return self.cls.credit_note_line
 
-    def create_sales_representative(self):
-        if hasattr(self.cls, 'sales_representative'):
-            return self.cls.sales_representative
-        
-        if not hasattr(self.cls, 'employee'):
-            emc = EmployeeModelCreator(self.cls)
-            emc.create_employee()
-
-        self.cls.sales_representative = SalesRepresentative.objects.create(
-            employee= self.cls.employee
-        )
-
-        return self.cls.sales_representative
+   

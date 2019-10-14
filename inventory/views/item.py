@@ -23,7 +23,6 @@ from common_data.utilities import *
 from common_data.views import PaginationMixin
 from inventory import filters, forms, models, serializers
 from invoicing.models import SalesConfig
-from services.models import EquipmentRequisition
 
 from .common import CREATE_TEMPLATE
 

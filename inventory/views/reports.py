@@ -13,7 +13,6 @@ from common_data.utilities import (ConfigMixin,
                                 
 from inventory.views.common import CREATE_TEMPLATE
 from wkhtmltopdf.views import PDFTemplateView
-from accounting.models import JournalEntry, Credit, Debit
 from django.db.models import Q
 
 class InventoryReport( ConfigMixin, MultiPageDocument,TemplateView):
@@ -110,39 +109,6 @@ class PaymentsDuePDFView(ContextMixin,
     def get_multipage_queryset(self):
         return PaymentsDueReportView.get_multipage_queryset(self)
 
-class VendorBalanceReportView(ContextMixin, 
-                          ConfigMixin, 
-                          MultiPageDocument, 
-                          TemplateView):
-    template_name = os.path.join('inventory', 'reports', 'vendor_balance',
-        'report.html')
-    page_length = 20
-    extra_context = {
-        'date': datetime.date.today(),
-        'pdf_link': True,
-        'total': lambda: sum([i.account.balance \
-                             for i in models.Supplier.objects.all()])
-    }
-
-    def get_multipage_queryset(self):
-        return models.Supplier.objects.all()
-
-
-class VendorBalancePDFView(ContextMixin,
-                          ConfigMixin, 
-                          MultiPageDocument,
-                          PDFTemplateView):
-    template_name = VendorBalanceReportView.template_name
-    page_length = VendorBalanceReportView.page_length
-    extra_context = {
-        'date': datetime.date.today(),
-        'total': lambda: sum([i.account.balance \
-                             for i in models.Supplier.objects.all()])
-    }
-
-    def get_multipage_queryset(self):
-        return VendorBalanceReportView.get_multipage_queryset(self)
-
 class VendorAverageDaysToDeliverReportView(ConfigMixin,
                                          ContextMixin,
                                          MultiPageDocument,
@@ -172,61 +138,5 @@ class VendorAverageDaysToDeliverPDFView(ContextMixin,
     def get_multipage_queryset(self):
         return VendorAverageDaysToDeliverReportView.get_multipage_queryset(self)
 
-class TransactionByVendorReportFormView(ContextMixin, FormView):
-    template_name = os.path.join('common_data', 'reports', 
-        'report_template.html')
-    form_class = PeriodReportForm
-    extra_context = {
-        'action': '/inventory/vendor-transactions-report/'
-    }
 
 #DO NOT PAGINATE, table will handle it
-class TransactionByVendorReportView(ContextMixin, ConfigMixin, TemplateView):
-    template_name = os.path.join('inventory', 'reports', 'vendor_transactions', 'report.html')
-
-    extra_context = {
-        'pdf_link': True
-    }
-
-    def common_context(context, start, end):
-        vendors = models.Supplier.objects.all()
-        
-        context["vendors"] = [{
-            'name': v.name,
-            'transactions': sorted(list(Credit.objects.filter(
-                account=v.account, 
-                entry__date__gte=start,
-                entry__date__lte=end
-                )
-            ) + list(Debit.objects.filter(account=v.account, 
-                entry__date__gte=start,
-                entry__date__lte=end
-                    )
-                ),
-            key=lambda x: x.entry.date),
-            'total': v.account.balance_over_period(start, end)
-        } for v in vendors]
-        start, end = encode_period(start, end)
-        context.update({
-            'start': start,
-            'end': end,
-        })
-
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        start, end = extract_period(self.request.GET)
-        self.__class__.common_context(context, start, end)
-
-        return context
-    
-
-class TransactionByVendorPDFView(ConfigMixin, PDFTemplateView):
-    template_name = TransactionByVendorReportView.template_name
-
-    def get_context_data(self, *args, **kwargs):
-        context =  super().get_context_data(*args, **kwargs)
-        start, end = extract_encoded_period(self.kwargs)
-        TransactionByVendorReportView.common_context(context, start, end)
-        
-        return context

@@ -12,7 +12,6 @@ from crispy_forms.layout import (HTML,
 from django import forms
 from django.forms.widgets import HiddenInput, MultipleHiddenInput
 
-from accounting.models import Account, Journal,Tax
 from common_data.forms import BootstrapMixin, PeriodReportForm
 from common_data.models import Organization, Individual
 from . import models
@@ -157,17 +156,6 @@ class CustomerForm(BootstrapMixin, forms.Form):
             )
 
 
-class SalesRepForm(forms.ModelForm, BootstrapMixin):
-    class Meta:
-        exclude = 'active',
-        model = models.SalesRepresentative
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.helper = FormHelper()
-        self.helper.add_input(Submit('submit', 'Submit'))
-
 class InvoiceCreateMixin(forms.Form):
     apply_payment = forms.BooleanField(required=False)
 
@@ -269,7 +257,6 @@ class ImportCustomersForm(forms.Form):
     address = forms.IntegerField()
     email = forms.IntegerField()
     phone = forms.IntegerField()
-    account_balance = forms.IntegerField()
     start_row = forms.IntegerField()
     end_row = forms.IntegerField()
 
@@ -291,7 +278,6 @@ class ImportCustomersForm(forms.Form):
                 <li>Type - One of Individual or Organization</li>
                 <li>Email</li>
                 <li>Phone</li>
-                <li>Account Balance - current balance with customer</li>
                 
             </ul>"""),
             Row(
@@ -300,7 +286,6 @@ class ImportCustomersForm(forms.Form):
                 Column('type', css_class='col-2'),
                 Column('email', css_class='col-2'),
                 Column('phone', css_class='col-2'),
-                Column('account_balance', css_class='col-2'),
             ),
             HTML("""
             <h4>Rows:</h4>
@@ -326,13 +311,8 @@ class ImportInvoiceForm(BootstrapMixin,forms.Form):
         models.Customer.objects.all(),
         widget=Select2Widget
         )
-    salesperson = forms.ModelChoiceField(
-        models.SalesRepresentative.objects.all(),
-        widget=Select2Widget
-        )
-    sales_tax = forms.ModelChoiceField(
-        Tax.objects.all()
-        )
+    salesperson = forms.CharField()
+    sales_tax = forms.FloatField()
     invoice_number = forms.IntegerField()
     
     description = forms.IntegerField()

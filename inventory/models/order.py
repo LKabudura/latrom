@@ -9,12 +9,10 @@ from django.db import models
 from django.db.models import Q
 
 import inventory
-from accounting.models import Account, Journal, JournalEntry
 from common_data.models import SingletonModel, SoftDeletionModel
 
 from .warehouse_models import StorageMedia, WareHouseItem
 from django.shortcuts import reverse
-from accounting.models import Expense, Asset, AccountingSettings
 
 # TODO i need to separate the order types into product, consumable and 
 # equipment orders. Each order has its own entries 
@@ -64,26 +62,15 @@ class Order(SoftDeletionModel):
         default="")
     ship_to = models.ForeignKey('inventory.WareHouse', 
         on_delete=models.SET_NULL, null=True)
-    tax = models.ForeignKey('accounting.Tax',on_delete=models.SET_NULL, 
-        null=True, 
-        default=1)
+    tax = models.FloatField(default=0.0)
     tracking_number = models.CharField(max_length=64, blank=True, 
         default="")
     notes = models.TextField(blank=True)
     status = models.CharField(max_length=24, 
         choices=ORDER_STATUS_CHOICES)
     received_to_date = models.FloatField(default=0.0)
-    issuing_inventory_controller = models.ForeignKey(
-        'inventory.InventoryController', 
-        default=1, on_delete=models.SET_NULL, null=True)
-    entry = models.ForeignKey('accounting.JournalEntry',
-         blank=True, on_delete=models.SET_NULL, null=True, 
-         related_name="order_entry")
-    entries = models.ManyToManyField('accounting.JournalEntry',
-        related_name="order_entries")
-    shipping_cost_entries = models.ManyToManyField('accounting.JournalEntry', 
-        related_name="shipping_cost_entries")
-
+    issuing_inventory_controller = models.CharField(max_length=64)
+    
     def get_absolute_url(self):
         return reverse("inventory:order-detail", kwargs={"pk": self.pk})
     
@@ -190,30 +177,6 @@ class Order(SoftDeletionModel):
 
         return (received_quantity / ordered_quantity) * 100.0
 
-    def create_entry(self):
-        #verified
-        if not self.entry:
-            j = JournalEntry.objects.create(
-                    date=self.date,
-                    memo = self.notes,
-                    journal = Journal.objects.get(pk=4),
-                    created_by = self.issuing_inventory_controller.employee.user,
-                    draft=False
-                )
-
-            #accounts payable
-            # since we owe the supplier
-            if not self.supplier.account:
-                self.supplier.create_account()
-            j.credit(self.total, self.supplier.account)
-            j.debit(self.subtotal, Account.objects.get(pk=4006))#purchases
-            j.debit(self.tax_amount, Account.objects.get(pk=2001))#tax
-        else:
-            j = self.entry
-
-        if not self.entry:
-            self.entry = j
-    
         
     def receive(self):
         if self.status != 'received':

@@ -7,31 +7,24 @@ from django.test.client import RequestFactory
 from django.urls import reverse
 
 from django.contrib.auth.models import User
-from accounting.models import Account, Expense, Currency
-from common_data.tests import create_account_models, create_test_user
-from employees.models import Employee
+from common_data.tests import create_test_user
 from invoicing.models import *
 from latrom import settings
-from services.models import Service, ServiceCategory
 from .model_util import InvoicingModelCreator
-import accounting
 from invoicing.views import (CustomerStatementPDFView, 
                              SalesReportPDFView,
                              CustomerPaymentsPDFView,
                              SalesByCustomerReportPDFView,
                              AverageDaysToPayPDFView,
-                             AccountsReceivableReportPDFView,
                              InvoiceAgingPDFView)
 from common_data.tests import create_test_common_entities
 import copy
-from messaging.models import UserProfile
 
 TODAY = datetime.datetime.today()
 
 
 class CommonViewsTests(TestCase):
-    fixtures = ['common.json','accounts.json', 'employees.json', 
-        'invoicing.json' ]
+    fixtures = ['common.json','invoicing.json' ]
 
     @classmethod
     def setUpClass(cls):
@@ -87,8 +80,7 @@ class CommonViewsTests(TestCase):
 
 
 class ReportViewsTests(TestCase):
-    fixtures = ['common.json','accounts.json', 'employees.json', 
-        'invoicing.json']
+    fixtures = ['common.json','invoicing.json']
 
     @classmethod
     def setUpClass(cls):
@@ -141,16 +133,7 @@ class ReportViewsTests(TestCase):
         req = RequestFactory().get(reverse('invoicing:invoice-aging-pdf'))
         resp = InvoiceAgingPDFView.as_view()(req)
         self.assertEqual(resp.status_code, 200)
-
-    def test_get_accounts_receivable_page(self):
-        resp = self.client.get(reverse('invoicing:accounts-receivable-report'))
-        self.assertEqual(resp.status_code, 200)
     
-    def test_get_accounts_receivable_report_pdf_page(self):
-        req = RequestFactory().get(reverse(
-            'invoicing:accounts-receivable-report-pdf'))
-        resp = AccountsReceivableReportPDFView.as_view()(req)
-        self.assertEqual(resp.status_code, 200)
 
     def test_get_average_days_to_pay(self):
         resp = self.client.get(reverse('invoicing:average-days-to-pay-report'))
@@ -234,8 +217,7 @@ class ReportViewsTests(TestCase):
 
 
 class CustomerViewsTests(TestCase):
-    fixtures = ['common.json','accounts.json', 'employees.json', 
-        'invoicing.json']
+    fixtures = ['common.json', 'invoicing.json']
 
     @classmethod
     def setUpClass(cls):
@@ -358,68 +340,8 @@ class CustomerViewsTests(TestCase):
         self.assertEqual(resp.status_code, 200)
 
 
-class SalesRepViewsTests(TestCase):
-    fixtures = ['common.json', 'accounts.json', 'employees.json', 
-        'invoicing.json']
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        imc = InvoicingModelCreator(cls)
-        imc.create_all()
-        cls.client=Client()
-        cls.REP_DATA = {
-            'employee': 1,
-            'can_reverse_invoices': True,
-            'can_offer_discounts': True
-        }
-
-    @classmethod
-    def setUpTestData(cls):
-        Employee.objects.create(
-            first_name="Test",
-            last_name="Employee",
-        )
-        create_test_user(cls)
-        create_test_common_entities(cls)
-
-    def setUp(self):
-        #wont work in setUpClass
-        self.client.login(username='Testuser', password='123')
-
-    def test_get_create_sales_rep_page(self):
-        resp = self.client.get(reverse('invoicing:create-sales-rep'))
-        self.assertEqual(resp.status_code, 200)
-
-    def test_post_create_sales_rep_page(self):
-        resp = self.client.post(reverse('invoicing:create-sales-rep'),
-            data=self.REP_DATA)
-        self.assertEqual(resp.status_code, 302)
-
-    def test_get_update_sales_rep_page(self):
-        resp = self.client.get(reverse('invoicing:update-sales-rep', kwargs={'pk':1}))
-        self.assertEqual(resp.status_code, 200)
-
-    def test_post_update_sales_rep_page(self):
-        resp = self.client.post(reverse('invoicing:update-sales-rep', kwargs={'pk':1}), data=self.REP_DATA)
-        self.assertEqual(resp.status_code, 302)
-
-    def test_get_delete_sales_rep_page(self):
-        resp = self.client.get(reverse('invoicing:delete-sales-rep', kwargs={'pk':1}))
-        self.assertEqual(resp.status_code, 200)
-
-
-    def test_post_delete_sales_rep_page(self):
-        
-        resp = self.client.post(reverse('invoicing:delete-sales-rep', kwargs={'pk':SalesRepresentative.objects.first().pk}))
-
-        self.assertEqual(resp.status_code, 302)
-        InvoicingModelCreator(self).create_sales_representative()
-        
-
 class InvoiceViewTests(TestCase):
-    fixtures = ['common.json','accounts.json', 'employees.json', 
-        'journals.json','invoicing.json']
+    fixtures = ['common.json','invoicing.json']
     
     @classmethod
     def setUpClass(cls):
@@ -440,7 +362,7 @@ class InvoiceViewTests(TestCase):
                     'type': 'product',
                     'selected': '1 - item',
                     'quantity': 1,
-                    'tax': '1 - Tax',
+                    'tax': '15',
                     'unitPrice': '5.00',
                     'discount': '0'
                 },
@@ -467,7 +389,6 @@ class InvoiceViewTests(TestCase):
         imc = InvoicingModelCreator(cls)
         imc.create_all()
         create_test_user(cls)
-        amc = accounting.tests.model_util.AccountingModelCreator(cls).create_tax()
         create_test_common_entities(cls)
         UserProfile.objects.create(
             user=User.objects.get(username='Testuser'),
@@ -643,8 +564,7 @@ class InvoiceViewTests(TestCase):
 
 
 class QuotationViewTests(TestCase):
-    fixtures = ['common.json','accounts.json', 'employees.json', 
-        'journals.json','invoicing.json']
+    fixtures = ['common.json','invoicing.json']
     
     @classmethod
     def setUpClass(cls):
@@ -665,7 +585,7 @@ class QuotationViewTests(TestCase):
                     'selected': '1 - item',
                     'unitPrice': '5.00',
                     'quantity': 1,
-                    'tax': '1 - Tax',
+                    'tax': '15',
                     'discount': '0'
                 },
                 {   
@@ -691,7 +611,6 @@ class QuotationViewTests(TestCase):
         imc = InvoicingModelCreator(cls)
         imc.create_all()
         create_test_user(cls)
-        amc = accounting.tests.model_util.AccountingModelCreator(cls).create_tax()
         create_test_common_entities(cls)
 
     def setUp(self):
@@ -757,7 +676,7 @@ class QuotationViewTests(TestCase):
 
 
 class ConfigWizardTests(TestCase):
-    fixtures = ['common.json', 'invoicing.json', 'accounts.json', 'journals.json']
+    fixtures = ['common.json', 'invoicing.json']
 
     @classmethod
     def setUpClass(cls):
@@ -789,20 +708,8 @@ class ConfigWizardTests(TestCase):
             '1-name': 'some one'
         }
 
-        employee_data = {
-            '2-first_name': 'first',
-            '2-last_name': 'last',
-            '2-leave_days': 1,
-            '2-pin': 1000,
-            'config_wizard-current_step': 2,
-        }
 
-        rep_data = {
-            'config_wizard-current_step': 3,
-            '3-employee': 1
-        }
-
-        data_list = [config_data, customer_data, employee_data, rep_data]
+        data_list = [config_data, customer_data, rep_data]
 
         for step, data in enumerate(data_list, 1):
 

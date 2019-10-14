@@ -23,60 +23,12 @@ from common_data.utilities import *
 from common_data.views import PaginationMixin
 from inventory import filters, forms, models, serializers
 from invoicing.models import SalesConfig
-from services.models import EquipmentRequisition, ConsumablesRequisition
 from inventory.views.dash_plotters import composition_plot
 from formtools.wizard.views import SessionWizardView
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-from employees.forms import EmployeeForm
-from employees.models import Employee
 
 CREATE_TEMPLATE =os.path.join("common_data", "create_template.html")
-
-
-#####################################################
-#               Inventory Controller                #
-#####################################################
-
-
-class InventoryControllerCreateView(ContextMixin, CreateView):
-    form_class = forms.InventoryControllerForm
-    template_name = os.path.join('common_data', 'crispy_create_template.html')
-    success_url =  reverse_lazy('inventory:inventory-controller-list')
-    extra_context = {
-        'title': 'Create Inventory Controller',
-        'description': 'Assign an existing employee to the role of inventory controller and provide the permissions for their role.',
-        'related_links': [{
-            'name': 'Create Employee',
-            'url': '/employees/create-employee/'
-        }],
-        'box_array':  urllib.parse.quote(json.dumps([{
-                "model": "employee",
-                "app": "employees",
-                "id": "id_employee",
-            }]))
-    }
-
-    
-class InventoryControllerUpdateView(ContextMixin, UpdateView):
-    form_class = forms.InventoryControllerUpdateForm
-    template_name = CREATE_TEMPLATE
-    queryset = models.InventoryController.objects.all()
-    success_url =  reverse_lazy('inventory:inventory-controller-list')
-    extra_context = {
-        'title': 'Update Inventory Controller',
-        
-    }
-
-class InventoryControllerListView(ContextMixin,   PaginationMixin, FilterView):
-    queryset = models.InventoryController.objects.all()
-    template_name = os.path.join('inventory', 'inventory_controller_list.html')
-    filterset_class = filters.ControllerFilter
-    extra_context = {
-        'title': 'List of Inventory Controllers',
-        'new_link': reverse_lazy('inventory:create-inventory-controller'),
-        'description': 'These are employees with user privileges assigned to manage inventory creation, movement and verification.'
-    }
 
 
 class InventoryDashboard(InventoryConfigMixin, TemplateView):
@@ -201,26 +153,14 @@ class CategoryListAPIView(ListAPIView):
 
 
 
-def inventory_controller_condition(self):
-    return models.InventoryController.objects.all().count() == 0
-
-def employee_condition(self):
-    return Employee.objects.all().count() == 0
-
 class ConfigWizard(ConfigWizardBase):
     template_name = os.path.join('inventory', 'wizard.html')
     form_list = [
         forms.ConfigForm, 
-        EmployeeForm,
-        forms.InventoryControllerForm,
         forms.WareHouseForm, 
         forms.SupplierForm, 
         ]
 
-    condition_dict = {
-        '1': employee_condition,
-        '2': inventory_controller_condition
-    }
     config_class = models.InventorySettings
     success_url = reverse_lazy('inventory:home')
     file_storage = FileSystemStorage(location=settings.MEDIA_ROOT)

@@ -14,13 +14,6 @@ class CustomerFilter(django_filters.FilterSet):
             
         }
 
-class SalesRepFilter(django_filters.FilterSet):
-    class Meta:
-        model = models.SalesRepresentative
-        fields = {
-            'employee': ['exact'],
-        }
-
 
 class CreditNoteFilter(django_filters.FilterSet):
     class Meta:
@@ -36,6 +29,5 @@ class InvoiceFilter(django_filters.FilterSet):
         fields = {
             'date': ['exact'],
             'customer': ['exact'],
-            'salesperson': ['exact'],
             'status': ['exact']
         }

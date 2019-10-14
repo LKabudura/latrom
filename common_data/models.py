@@ -9,7 +9,6 @@ from django.db import models
 from latrom import settings
 import subprocess
 from background_task.models import Task
-from common_data.utilities.mixins import ContactsMixin
 from django.shortcuts import reverse
 class PhoneNumber(models.Model):
     number = models.CharField(max_length=16)
@@ -42,7 +41,7 @@ class SoftDeletionModel(models.Model):
     def hard_delete(self):
         super().delete()
 
-class Individual(ContactsMixin, Person, SoftDeletionModel):
+class Individual(Person, SoftDeletionModel):
     '''inherits from the base person class in common data
     represents clients of the business with entry specific details.
     the customer can also have an account with the business for credit 
@@ -74,7 +73,7 @@ class Note(models.Model):
     def __str__(self):
         return "{}({}): {}".format(self.timestamp.strftime("%d %b %y, %H:%M "), self.author, self.note)
 
-class Organization(ContactsMixin, models.Model):
+class Organization(models.Model):
     phone_fields = ['phone']
     email_fields = ['email']
 
@@ -141,11 +140,7 @@ class GlobalConfig(SingletonModel):
     document_theme = models.IntegerField(
         choices= DOCUMENT_THEME_CHOICES, 
         default=1)
-    currency = models.ForeignKey(
-        'accounting.Currency', 
-        blank=True, 
-        on_delete=models.SET_NULL, 
-        null=True)
+    currency = models.CharField(default='ZWL', max_length=32)
     organization = models.ForeignKey(
         'common_data.organization',
         on_delete=models.SET_NULL, 
