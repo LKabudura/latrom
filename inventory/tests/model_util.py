@@ -118,8 +118,6 @@ class InventoryModelCreator():
         if not hasattr(self.cls, 'warehouse'):
             self.create_warehouse()
 
-        if not hasattr(self.cls, 'controller'):
-            self.create_inventory_controller()
 
         self.cls.order = models.Order.objects.create(
             expected_receipt_date = datetime.date.today(),
@@ -130,7 +128,7 @@ class InventoryModelCreator():
             tracking_number = '34234',
             notes = 'Test Note',
             status = 'draft',
-            issuing_inventory_controller=self.cls.controller
+            issuing_inventory_controller='controller'
         )
 
     def create_orderitem(self):

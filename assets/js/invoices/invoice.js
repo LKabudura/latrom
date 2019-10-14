@@ -45,26 +45,12 @@ export default class InvoiceTable extends Component{
                             unitPrice: parseFloat(line.product.unit_price),
                             
                         };
-                    }else if (line.line_type === 2){
-                        data = {
-                            selected: line.service.id + '-' + line.service.service.name,
-                            hours: line.service.hours,
-                            rate: line.service.hourly_rate,
-                            fee: line.service.flat_fee
-                        }
-                    }else if (line.line_type === 3){
-                        data = {
-                            selected: line.expense.id + '-' +line.expense.expense.description,
-                            description: line.expense.expense.description,
-                            amount: line.expense.expense.amount 
-                        }
                     }
                     return {
                         type: lineMappings[line.line_type],
                         ...data,
                         discount: parseFloat(line.discount),
-                        tax: line.tax.id +'-'+line.tax.name +
-                                    '@'+line.tax.rate
+                        tax: line.tax
                      }
                  })
                  this.setState({items: itemList}, this.updateForm);
@@ -153,7 +139,7 @@ export default class InvoiceTable extends Component{
 const SaleLine = (props) =>{
     const subtotal = props.unitPrice * parseFloat(props.quantity);
     const discount =  subtotal * (props.discount / 100.0)
-    const taxRate = parseFloat(props.tax.split('@')[1])
+    const taxRate = parseFloat(props.tax)
     const tax = (subtotal - discount) * (taxRate /100.0) 
     const total = subtotal - discount + tax
     return(
@@ -168,54 +154,6 @@ const SaleLine = (props) =>{
                     props.selected.split('-')[1]
                 } @ ${parseFloat(props.unitPrice).toFixed(2)} each.
             </td>
-            <td>{props.discount}</td>
-            <td>{props.tax}%</td>
-            <td>{total.toFixed(2)}</td>
-        </tr>
-    )
-}
-
-const ServiceLine = (props) =>{
-    console.log('tax')
-    console.log(props.tax)
-    const subtotal = (parseFloat(props.hours) * parseFloat(props.rate)) +
-         parseFloat(props.fee);
-    const discount =  subtotal * (props.discount / 100.0)
-    const taxRate = parseFloat(props.tax.split('@')[1])
-    const tax = (subtotal - discount) * (taxRate /100.0) 
-    const total = subtotal - discount + tax
-
-    return(
-        <tr>
-            <td>
-                <DeleteButton
-                    index={props.index}
-                    handler={props.handler}/>
-            </td>
-            <td>{
-                props.selected.split('-')[1]
-            } - Flat Fee: ${props.fee} + {props.hours}Hrs x @ ${props.rate} /Hr</td>
-            <td>{props.discount}</td>
-            <td>{props.tax}%</td>
-            <td>{total.toFixed(2)}</td>
-        </tr>
-    )
-}
-
-const BillableLine = (props) =>{
-    const subtotal  =parseFloat(props.amount);
-    const discount =  subtotal * (props.discount / 100.0)
-    const taxRate = parseFloat(props.tax.split('@')[1])
-    const tax = (subtotal - discount) * (taxRate /100.0) 
-    const total = subtotal - discount + tax
-    return(
-        <tr>
-            <td>
-                <DeleteButton 
-                    index={props.index}
-                    handler={props.handler}/>
-            </td>
-            <td>{props.description} @ ${props.amount}</td>
             <td>{props.discount}</td>
             <td>{props.tax}%</td>
             <td>{total.toFixed(2)}</td>

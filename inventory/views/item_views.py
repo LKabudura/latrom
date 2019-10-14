@@ -169,11 +169,6 @@ class ConsumableListView( ContextMixin,
                 'label': 'Import Items from Excel',
                 'icon': 'file-excel',
                 'link': reverse_lazy('inventory:import-items-from-excel')
-            },{
-                'label': 'Purchase',
-                'icon': 'cart-arrow-down',
-                'link': reverse_lazy(
-                    'inventory:equipment-and-consumables-purchase')
             }
         ]
     }
@@ -247,16 +242,7 @@ class EquipmentUpdateView( ContextMixin,
     def get_initial(self):
         initial = super().get_initial()
         item = models.InventoryItem.objects.get(pk=self.kwargs['pk'])
-        if item.equipment_component and item.equipment_component.asset_data:
-            asset = item.equipment_component.asset_data
-            initial.update({
-                'record_as_asset': True,
-                'asset_category': asset.category,
-                'initial_value': asset.initial_value,
-                'date_purchased': asset.init_date,
-                'salvage_value': asset.salvage_value,
-                'depreciation_period': asset.depreciation_period
-            })
+        
         return initial
         
 class EquipmentDetailView( DetailView):

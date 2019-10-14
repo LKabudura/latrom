@@ -273,24 +273,6 @@ class ViewTests(TestCase):
         resp = self.client.get('/base/authenticate')
         self.assertEqual(resp.status_code, 200)
 
-    def test_post_create_note(self):
-        ServiceModelCreator(
-            self).create_service_work_order()
-
-        resp = self.client.post(reverse('base:create-note'), data={
-            'author': User.objects.first().pk,
-            'note': 'testing',
-            'target': 'work_order',
-            'target_id': 1
-        })
-        self.assertEqual(resp.status_code, 200)
-        data = json.loads(resp.content)
-        self.assertEqual(data['status'], 'ok')
-
-    def test_current_db(self):
-        resp = self.client.get('/base/api/current-db/')
-        self.assertEqual(resp.status_code, 200)
-
 class UtilityTests(TestCase):
     fixtures = ['common.json', 'invoicing.json']
 
@@ -363,26 +345,3 @@ class CommonDataWizardTests(TestCase):
 
         resp = self.client.post(reverse('base:config-wizard'), data=config_data)
         self.assertEqual(resp.status_code, 302)
-
-class LicenseTaskTests(TestCase):
-    fixtures = ['common.json']
-    
-    @classmethod
-    def setUpTestData(cls):
-        pass
-
-
-    def test_verification(self):
-        @responses.activate
-        def responses_action():
-            responses.add(responses.GET, 
-                'http://nakamura9.pythonanywhere.com/validate',
-                body=json.dumps({'status': 'valid'}))
-            
-            license = json.load(open('../license.json', 'r'))
-            license_verification_func(license, 
-                'http://nakamura9.pythonanywhere.com/validate')
-
-        responses_action()
-        settings = GlobalConfig.objects.first()
-        self.assertEqual(settings.last_license_check, datetime.date.today())

@@ -20,16 +20,14 @@ import copy
 
 TODAY = datetime.date.today()
 from inventory.views import (InventoryReportPDFView,
-                             TransactionByVendorPDFView,
                              OutstandingOrderReportPDFView,
                              PaymentsDuePDFView,
                              VendorAverageDaysToDeliverPDFView,
-                             VendorBalancePDFView,
                              )
         
 
 class CommonViewTests(TestCase):
-        fixtures = ['common.json', 'invoicing.json', 'inventory.json']
+    fixtures = ['common.json', 'invoicing.json', 'inventory.json']
 
 
     @classmethod
@@ -160,7 +158,6 @@ class InventoryManagementViewTests(TestCase):
         create_test_user(cls)
         create_test_inventory_models(cls)
         create_test_common_entities(cls)
-        InventoryModelCreator(cls).create_inventory_controller()
 
         
     def setUp(self):
@@ -168,12 +165,18 @@ class InventoryManagementViewTests(TestCase):
 
     def test_get_stock_receipt_form(self):
         resp = self.client.get(reverse('inventory:stock-receipt-create',
-            kwargs={'pk': 1}))
+            kwargs={
+                'warehouse': 1,
+                'pk': 1
+            }))
         self.assertEqual(resp.status_code,  200)
 
     def test_post_stock_receipt_form(self):
         resp = self.client.post(reverse('inventory:stock-receipt-create',
-            kwargs={'pk': 1}),
+            kwargs={
+                'warehouse': 1,
+                'pk': 1
+                }),
             data={
                 'receive_date': TODAY,
                 'order': 1,
@@ -259,7 +262,7 @@ class InventoryManagementViewTests(TestCase):
 
 
 class ItemViewTests(TestCase):
-        fixtures = ['common.json', 'invoicing.json', 'inventory.json']
+    fixtures = ['common.json', 'invoicing.json', 'inventory.json']
 
 
     @classmethod
@@ -287,7 +290,7 @@ class ItemViewTests(TestCase):
             'minimum_order_level' : 0,
             'maximum_stock_level' : 20,
             'type': 0,
-            'tax': Tax.objects.create(name='tax', rate=15).pk
+            'tax':15
         }
         cls.EQUIPMENT_DATA = {
             'type': 1
@@ -461,7 +464,7 @@ class ItemViewTests(TestCase):
 
 
 class OrderViewTests(TestCase):
-        fixtures = ['common.json', 'invoicing.json', 'inventory.json']
+    fixtures = ['common.json', 'invoicing.json', 'inventory.json']
 
 
     @classmethod
@@ -494,12 +497,7 @@ class OrderViewTests(TestCase):
         create_test_user(cls)
         create_test_inventory_models(cls)
         create_test_common_entities(cls)
-        InventoryModelCreator(cls).create_inventory_controller()
-        UserProfile.objects.create(
-            user=User.objects.get(username='Testuser'),
-            email_address="test@address.com",
-            email_password='123',
-        )
+        
         
     def setUp(self):
         self.client.login(username='Testuser', password='123')
@@ -582,12 +580,7 @@ class OrderViewTests(TestCase):
             }))
         self.assertEqual(resp.status_code,  200)
 
-    def test_get_order_email(self):
-        with self.assertRaises(Exception):
-            self.client.get(reverse('inventory:order-email',
-            kwargs={'pk': 1}))
-        
-        #self.assertEqual(resp.status_code,  200)
+   
 
     def test_get_shipping_costs_detail_view(self):
         resp = self.client.get("/inventory/order/expense/list/1")
@@ -672,7 +665,7 @@ class OrderViewTests(TestCase):
 
 
 class SupplierViewTests(TestCase):
-        fixtures = ['common.json', 'invoicing.json', 'inventory.json']
+    fixtures = ['common.json', 'invoicing.json', 'inventory.json']
 
 
     @classmethod
@@ -780,7 +773,7 @@ class SupplierViewTests(TestCase):
 
 
 class WarehouseViewTests(TestCase):
-        fixtures = ['common.json', 'invoicing.json', 'inventory.json']
+    fixtures = ['common.json', 'invoicing.json', 'inventory.json']
 
 
     @classmethod
@@ -814,9 +807,6 @@ class WarehouseViewTests(TestCase):
         create_test_user(cls)
         create_test_inventory_models(cls)
         create_test_common_entities(cls)
-        InventoryModelCreator(cls).create_inventory_controller()
-
-
 
 
     def setUp(self):
@@ -885,7 +875,7 @@ class WarehouseViewTests(TestCase):
 
 
 class ReportViewTests(TestCase):
-        fixtures = ['common.json', 'invoicing.json', 'inventory.json']
+    fixtures = ['common.json', 'invoicing.json', 'inventory.json']
 
 
     @classmethod
@@ -942,39 +932,9 @@ class ReportViewTests(TestCase):
         resp = VendorAverageDaysToDeliverPDFView.as_view()(req)
         self.assertEqual(resp.status_code, 200)
 
-    def test_vendor_balance_report(self):
-        resp =self.client.get(reverse('inventory:vendor-balance-report'))
-        self.assertEqual(resp.status_code, 200)
+   
 
-    def test_vendor_balance_report(self):
-        req =RequestFactory().get(reverse('inventory:vendor-balance-report'))
-        resp =VendorBalancePDFView.as_view()(req)
-
-        self.assertEqual(resp.status_code, 200)
-
-    def test_transaction_by_vendor_form(self):
-        resp = self.client.get(reverse('inventory:vendor-transactions-form'))
-        self.assertEqual(resp.status_code, 200)
-
-    def test_vendor_transactions_report(self):
-        resp = self.client.get(reverse('inventory:vendor-transactions-report'), 
-            data={
-                'start_period': datetime.date.today() - datetime.timedelta(days=365),
-                'end_period': datetime.date.today()
-            })
-        self.assertEqual(resp.status_code, 200)
-
-    def test_vendor_transactions_pdf_report(self):
-        kwargs = {
-                'start': (datetime.date.today() \
-                    - datetime.timedelta(days=365)).strftime('%d %B %Y'),
-                'end': datetime.date.today().strftime('%d %B %Y')
-            }
-        req = RequestFactory().get(reverse(
-            'inventory:vendor-transactions-pdf', kwargs=kwargs))
-        resp = TransactionByVendorPDFView.as_view()(req, **kwargs)
-        
-        self.assertEqual(resp.status_code, 200)
+   
 
 class TransferViewTests(TestCase):
     fixtures = ['common.json', 'invoicing.json', 'inventory.json']
@@ -1011,7 +971,6 @@ class TransferViewTests(TestCase):
         create_test_user(cls)
         create_test_inventory_models(cls)
         create_test_common_entities(cls)
-        InventoryModelCreator(cls).create_inventory_controller()
 
 
 
@@ -1041,12 +1000,18 @@ class TransferViewTests(TestCase):
 
     def test_get_receive_transfer_order_page(self):
         resp = self.client.get(reverse('inventory:receive-transfer',
-            kwargs={'pk': 1}))
+            kwargs={
+                'warehouse': 1,
+                'pk': 1
+            }))
         self.assertEqual(resp.status_code, 200)
 
     def test_post_receive_transfer_order_page(self):
         resp = self.client.get(reverse('inventory:receive-transfer', 
-            kwargs={'pk': 1}), data=self.RECEIVE_DATA)
+            kwargs={
+                'warehouse': 1,
+                'pk': 1
+            }), data=self.RECEIVE_DATA)
         self.assertEqual(resp.status_code, 200)
 
 
@@ -1076,25 +1041,23 @@ class ConfigWizardTests(TestCase):
             '0-inventory_valuation_method': 1
         }
 
-        
-        
 
         warehouse_data = {
-            'config_wizard-current_step': 3,
-            '3-name': 'name',
-            '3-address': 'address',
-            '3-length': 0,
-            '3-width': 0,
-            '3-height': 0,
+            'config_wizard-current_step': 1,
+            '1-name': 'name',
+            '1-address': 'address',
+            '1-length': 0,
+            '1-width': 0,
+            '1-height': 0,
         }
 
         supplier_data = {
-            'config_wizard-current_step': 4,
-            '4-vendor_type': 'individual',
-            '4-name': 'caleb kandoro'
+            'config_wizard-current_step': 2,
+            '2-vendor_type': 'individual',
+            '2-name': 'caleb kandoro'
         }
 
-        data_list = [config_data, controller_data, 
+        data_list = [config_data, 
             warehouse_data, supplier_data]
 
         for step, data in enumerate(data_list, 1):

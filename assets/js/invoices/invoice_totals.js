@@ -23,15 +23,11 @@ class Totals extends Component{
             subtotal = (parseFloat(item.hours) * parseFloat(item.rate)) +
                 parseFloat(item.fee);
             
-        }else{
-            //billable
-            subtotal  =parseFloat(item.amount);
-            
         }
         
         const discount =  subtotal * (item.discount / 100.0)
         subtotal = subtotal - discount;
-        const percentage = parseFloat(item.tax.split('@')[1])
+        const percentage = parseFloat(item.tax)
         const tax = subtotal * (percentage /100.0)
         return ({
             subtotal: subtotal,

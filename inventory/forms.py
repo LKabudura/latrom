@@ -313,8 +313,9 @@ class EquipmentForm(ItemInitialMixin, forms.ModelForm, BootstrapMixin):
                         Column('image', css_class='form group col-6'),
                     ), 
                 ),
+        ),
             Div(Submit('submit', 'Submit'), css_class="floating-submit")
-        )
+
         )
 
     class Meta:
@@ -324,54 +325,7 @@ class EquipmentForm(ItemInitialMixin, forms.ModelForm, BootstrapMixin):
             'supplier': Select2Widget(attrs={'data-width': '24rem'})
         }
 
-    def save(self, **kwargs):
-        instance = super().save(**kwargs)
-
-        def create_asset():
-            return Asset.objects.create(
-                    name=instance.name,
-                description=instance.description,
-                category = self.cleaned_data['asset_category'],
-                initial_value = self.cleaned_data['initial_value'],
-                init_date = self.cleaned_data['date_purchased'],
-                salvage_value = self.cleaned_data['salvage_value'],
-                depreciation_period=self.cleaned_data['depreciation_period']
-                )
-
-        if self.cleaned_data['record_as_asset']:
-            if instance.equipment_component and \
-                    instance.equipment_component.asset_data:
-                #edit each field
-                asset = instance.equipment_component.asset_data
-                asset.name=instance.name
-                asset.description=instance.description
-                asset.category = self.cleaned_data['asset_category']
-                asset.initial_value = self.cleaned_data['initial_value']
-                asset.init_date = self.cleaned_data['date_purchased']
-                asset.salvage_value = self.cleaned_data['salvage_value']
-                asset.depreciation_period=self.cleaned_data['depreciation_period']
-                asset.save()
-                instance.equipment_component.asset = asset
-                instance.equipment_component.save()
-
-            elif instance.equipment_component and \
-                    instance.equipment_component.asset_data is None:
-                #create asset
-                asset = create_asset()
-                instance.equipment_component.asset_data = asset
-                instance.equipment_component.save()
-
-            elif instance.equipment_component is None:
-                #create component and asset
-                asset = create_asset()
-                instance.equipment_component = \
-                    models.EquipmentComponent.objects.create(
-                        asset_data=asset
-                    )
-
-
-        instance.save()
-        return instance
+   
         
 
 class ConsumableForm(ItemInitialMixin, forms.ModelForm, BootstrapMixin):
@@ -409,14 +363,12 @@ class ConsumableForm(ItemInitialMixin, forms.ModelForm, BootstrapMixin):
                         Column('category', css_class="form-group col-sm-6"),
                         Column('image', css_class="form-group col-sm-6"),
                     ),
-                    'type', 
+                    'type',
                 )
             ),
-            Div(Submit('submit', 'Submit'), css_class="floating-submit")
-            
+            Div(Submit('submit', 'Submit'), css_class="floating-submit") 
         )
-        self.helper.add_input(Submit('submit', 'Submit'))
-
+        
     class Meta:
         exclude = 'quantity', 'product_component', 'equipment_component',
         model = models.InventoryItem

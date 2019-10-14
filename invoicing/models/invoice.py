@@ -122,23 +122,6 @@ class Invoice(SoftDeletionModel):
                 discount=discount
             )
             
-        elif data['type'] == 'service':
-            pk = data['selected'].split('-')[0]
-            print(f'Primary Key ##: {pk}')
-            service = Service.objects.get(pk=pk)
-            component = ServiceLineComponent.objects.create(
-                service=service,
-                hours=data['hours'],
-                flat_fee=data['fee'],
-                hourly_rate=data['rate']
-            )
-            self.invoiceline_set.create(
-                line_type=2,#service
-                service=component,
-                tax=tax,
-                discount=discount
-            )
-
             
 
        
@@ -287,20 +270,6 @@ class Invoice(SoftDeletionModel):
         
 
 
-    #sales specific expenses
-    @property
-    def total_shipping_costs(self):
-        '''Returns the numerical value of all recorded shipping expenses for a 
-        particular invoice'''
-        # TODO test
-        return sum([e.amount for  e in self.shipping_expenses.all()])
-
-    @property
-    def percentage_shipping_cost(self):
-        '''Returns the proportion of shipping cost relative to income generated 
-        by the invoice'''
-        return (float(self.total_shipping_costs) / float(self.total)) * 100.0
-
     @property
     def returned_total(self):
         '''returns the value of products returned to the warehouse'''
@@ -374,7 +343,7 @@ class InvoiceLine(models.Model):
         if self.line_type == 1:
             return str(self.component.product).split('-')[1]
         elif self.line_type == 2:
-            return self.component.service.name
+            return self.component.service
         
 
     def __str__(self):
@@ -390,9 +359,9 @@ class InvoiceLine(models.Model):
             )
         elif self.line_type == 2:
             ret_string = f'[SERVICE] {self.name}'
-            if self.component.service.flat_fee > 0:
+            if self.component.flat_fee > 0:
                 ret_string += ' Flat rate: {:0.2f}'.format(
-                    self.component.service.flat_fee
+                    self.component.flat_fee
                 )
             if self.component.hours > 0 and \
                     self.component.hourly_rate > 0:
@@ -428,9 +397,14 @@ class InvoiceLine(models.Model):
         if self.tax == None:
             return D(0)
         
-        return self.subtotal * D(self.tax.rate / 100.0)
+        return self.subtotal * D(self.tax/100.0)
 
-    
+    @property
+    def nominal_price(self):
+        if self.product:
+            return self.quantity * self.unit_price
+        return self.flat_fee  + (D(self.hours) * D(self.hourly_rate))
+
     def __getattribute__(self, name):
         try:
             return super().__getattribute__(name)

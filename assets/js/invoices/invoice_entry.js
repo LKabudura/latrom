@@ -1,8 +1,5 @@
 import React, {Component} from 'react';
-import  ExpenseEntry from './entries/expense'
-import  ServiceEntry from './entries/service'
 import  ProductEntry from './entries/product'
-import axios from 'axios';
 
 
 class EntryWidget extends Component{
@@ -13,24 +10,6 @@ class EntryWidget extends Component{
         
     }
 
-    componentDidMount =() =>{
-        let customer = document.getElementById('id_customer');
-        //initial value
-        this.setBillables(customer.value);
-        //event handler
-        $("#id_customer").on('change', (evt) =>{
-            this.setBillables(evt.target.value)
-        })
-    }
-
-    setBillables = (customer) =>{
-        axios({
-            method: 'get',
-            url: '/invoicing/api/customer/' + customer
-        }).then(res =>{
-            this.setState({billables: res.data.expense_set})
-        })
-    }
 
     clickHandler = (evt) =>{
         this.setState({'focused': evt.target.id})
@@ -79,29 +58,7 @@ class EntryWidget extends Component{
                 backgroundColor: '#007bff',
                 padding: '5px'
             }}>
-                <ul style={{listStylePosition: 'inside', paddingLeft: '0px'}}>
-                    <li 
-                        id="product" 
-                        style={{...tabStyle,
-                            borderWidth: this.state.focused ==="product"
-                            ? '1px 1px 0px 1px '
-                            : '0px 0px 1px 0px ',}}
-                        onClick={this.clickHandler}>Product</li>
-                    <li 
-                        id="service" 
-                        style={{...tabStyle,
-                            borderWidth: this.state.focused ==="service"
-                            ? '1px 1px 0px 1px '
-                            : '0px 0px 1px 0px ',}}
-                        onClick={this.clickHandler}>Service</li>
-                    <li 
-                        id="expense" 
-                        style={{...tabStyle,
-                            borderWidth: this.state.focused ==="expense"
-                            ? '1px 1px 0px 1px '
-                            : '0px 0px 1px 0px ',}}
-                        onClick={this.clickHandler}>Expense</li>
-                </ul>
+               
                 <div className="entry-style">
                     <div style={{...windowStyle,
                         'display': this.state.focused === "product"
@@ -110,26 +67,8 @@ class EntryWidget extends Component{
                         }}><ProductEntry
                                 itemList={this.props.itemList} 
                                 changeHandler={this.entryChangeHandler}     insertHandler={this.insertHandler}/></div>
-                    <div style={{...windowStyle,
-                        'display': this.state.focused === "service"
-                            ?'block' 
-                            :'none'
-                        }}><ServiceEntry 
-                                itemList={this.props.itemList}
-                                changeHandler={this.entryChangeHandler}
-                                insertHandler={this.insertHandler}/>
-                                    </div>
-                    <div style={{...windowStyle,
-                        'display': this.state.focused === "expense"
-                            ?'block' 
-                            :'none'
-                        }}><ExpenseEntry
-                                itemList={this.props.itemList} 
-                                billables={this.state.billables}
-                                changeHandler={this.entryChangeHandler}
-                                insertHandler={this.insertHandler}/></div>
-                                </div>
-                
+                    
+                </div>
             </div>
         )
     }

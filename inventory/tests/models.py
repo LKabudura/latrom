@@ -35,7 +35,6 @@ def create_test_inventory_models(cls):
             organization=cls.organization,
             )
 
-    InventoryModelCreator(cls).create_inventory_controller()
     cls.unit = models.UnitOfMeasure.objects.create(
             name='Test Unit',
             description='Test description'
@@ -66,7 +65,6 @@ def create_test_inventory_models(cls):
 
     ec = models.EquipmentComponent.objects.create(
         condition = "excellent",
-        asset_data = cls.asset
     )    
 
     cls.equipment = models.InventoryItem.objects.create(
@@ -118,7 +116,7 @@ def create_test_inventory_models(cls):
             tracking_number = '34234',
             notes = 'Test Note',
             status = 'draft',
-            issuing_inventory_controller=cls.controller
+            issuing_inventory_controller='controller'
         )
     cls.order_item = models.OrderItem.objects.create(
             order=cls.order,
@@ -135,7 +133,7 @@ def create_test_inventory_models(cls):
 
     cls.check = models.InventoryCheck.objects.create(
         date=TODAY,
-        adjusted_by=cls.controller,
+        adjusted_by='cls.controller',
         warehouse=cls.warehouse,
         comments="Nothing new"
     )
@@ -150,8 +148,8 @@ def create_test_inventory_models(cls):
     cls.transfer = models.TransferOrder.objects.create(
         date = TODAY,
         expected_completion_date = TODAY,
-        issuing_inventory_controller = cls.controller,
-        receiving_inventory_controller = cls.controller,
+        issuing_inventory_controller = 'cls.contoller',
+        receiving_inventory_controller = 'cls.contoller',
         actual_completion_date = TODAY,
         source_warehouse = cls.warehouse,
         receiving_warehouse = cls.warehouse,
@@ -163,7 +161,7 @@ def create_test_inventory_models(cls):
     )
     cls.scrap = models.InventoryScrappingRecord.objects.create(
         date=TODAY,
-        controller=cls.controller,
+        controller='cls.contoller',
         warehouse=cls.warehouse
     )
     cls.scrap_line = models.InventoryScrappingRecordLine.objects.create(
@@ -426,17 +424,10 @@ class ItemManagementModelTests(TestCase):
         self.order_item.save()
     '''
 
-    def test_debit_note_create_entry(self):
-        entries = JournalEntry.objects.all().count()
-        
-        self.note.create_entry()
-        
-        self.assertNotEqual(entries, JournalEntry.objects.all().count())
-
     def test_create_stock_receipt(self):
         obj = models.StockReceipt.objects.create(
             order=self.order,
-            received_by=self.controller,
+            received_by='cls.contoller',
             receive_date = TODAY,
             note = "Some note",
         )
@@ -447,7 +438,7 @@ class ItemManagementModelTests(TestCase):
     def test_create_inventory_check(self):
         obj = models.InventoryCheck.objects.create(
             date=TODAY,
-            adjusted_by=self.controller,
+            adjusted_by='cls.contoller',
             warehouse=self.warehouse,
             comments="Nothing new"
         )
@@ -490,8 +481,8 @@ class ItemManagementModelTests(TestCase):
         obj = models.TransferOrder.objects.create(
             date = TODAY,
             expected_completion_date = TODAY,
-            issuing_inventory_controller = self.controller,
-            receiving_inventory_controller = self.controller,
+            issuing_inventory_controller = 'cls.contoller',
+            receiving_inventory_controller = 'cls.contoller',
             actual_completion_date = TODAY,
             source_warehouse = self.warehouse,
             receiving_warehouse = self.warehouse,
@@ -515,7 +506,7 @@ class ItemManagementModelTests(TestCase):
     def test_create_inventory_scrapping_record(self):
         obj = models.InventoryScrappingRecord.objects.create(
             date=TODAY,
-            controller=self.controller,
+            controller='cls.contoller',
             warehouse=self.warehouse
         )
         self.assertIsInstance(obj, models.InventoryScrappingRecord)
@@ -700,7 +691,7 @@ class WarehouseModelTests(TestCase):
             name="Test Name",
             address="Test address",
             description="test description",
-            inventory_controller=self.controller
+            inventory_controller='cls.contoller'
         )
         self.assertIsInstance(obj, models.WareHouse)
         obj.delete()

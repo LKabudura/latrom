@@ -75,16 +75,7 @@ class Order(SoftDeletionModel):
         return reverse("inventory:order-detail", kwargs={"pk": self.pk})
     
 
-    @property
-    def total_shipping_costs(self):
-        # TODO test
-        return sum([e.total_credits  for e in self.shipping_cost_entries.all()])
-
-    @property
-    def percentage_shipping_cost(self):
-        return (float(self.total_shipping_costs) / float(self.total)) * 100.0
-    
-
+  
 
     def __str__(self):
         return 'ORD' + str(self.pk)
@@ -130,7 +121,7 @@ class Order(SoftDeletionModel):
     @property
     def tax_amount(self):
         if self.tax:
-            return self.subtotal * (D(self.tax.rate) / D(100))
+            return self.subtotal * (D(self.tax) / D(100))
         return D(0.0)
     
     @property

@@ -377,11 +377,3 @@ def document_notes_api(request, document=None, id=None):
 
 class ReportBlankView(TemplateView):
     template_name = os.path.join('common_data', 'reports', 'blank.html')
-
-def current_db(request):
-    #TODO support other database types
-    with open(os.path.join('database', 'config.json')) as fil:
-        config = json.load(fil)
-        return JsonResponse({
-            'db': config['current'].strip('sqlite3')
-        })

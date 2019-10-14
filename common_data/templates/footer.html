@@ -20,25 +20,16 @@
             {% if request.user.is_superuser %}
             <li><a style="color:white;" href="{% url 'base:config' pk=1 %}"> <i class="fa fa-cogs" aria-hidden="true"></i> Global Settings</a></li>
             {% endif %}
-            <li>
-                <a style="color:white;" href="{% url 'employees:portal-login' %}"> <i class="fas fa-user-cog"></i> Employee Portal</a>
-            </li>
-            <li>
-                <a style="color:white;" href="{% url 'employees:time-logger' %}"> <i class="fas fa-hourglass-half" ></i> Time Logger</a>
-            </li>
+            
         </ul>
     </div>
     <div class="text-white" style="padding:1cm;display:inline-block;border-left:3px solid white;">
         <h5><i class="fas fa-info-circle"></i> About</h5>
         <ul style="list-style-type:none;">
         <li><a style="color:white;" href="/base/about/"><i class="fas fa-info-circle"></i> About</a></li>
-        <li><i class="fas fa-database"></i> Current Database: <span id='current-db'></span></li>
     </ul>
     </div>
     </div>
     
 </footer>
 
-<script>
-    $.get('/base/api/current-db/', function(data){ $('#current-db').text(data.db)})
-</script>

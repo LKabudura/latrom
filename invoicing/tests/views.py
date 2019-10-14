@@ -11,7 +11,7 @@ from common_data.tests import create_test_user
 from invoicing.models import *
 from latrom import settings
 from .model_util import InvoicingModelCreator
-from invoicing.views import (CustomerStatementPDFView, 
+from invoicing.views import ( 
                              SalesReportPDFView,
                              CustomerPaymentsPDFView,
                              SalesByCustomerReportPDFView,
@@ -57,7 +57,6 @@ class CommonViewsTests(TestCase):
         self.assertEqual(resp.status_code, 200)
 
     def test_post_config_page(self):
-        Currency.objects.create(name="test", symbol="t")
         resp = self.client.post(reverse('invoicing:config', 
             kwargs={'pk': 1}),
             data={
@@ -67,7 +66,7 @@ class CommonViewsTests(TestCase):
                 "business_name": 'test name',
                 "next_invoice_number": 1,
                 "next_quotation_number": 1,
-                "currency": 1
+                "currency": 'zwl'
 
             })
         self.assertEqual(resp.status_code, 302)
@@ -98,32 +97,6 @@ class ReportViewsTests(TestCase):
     def setUp(self):
         #wont work in setUpClass
         self.client.login(username='Testuser', password='123')
-
-    def test_get_customer_statement_form_page(self):
-        resp = self.client.get(reverse('invoicing:customer-statement-form'))
-        self.assertEqual(resp.status_code, 200)
-
-    def test_get_customer_statement_page(self):
-        resp = self.client.get(reverse('invoicing:customer-statement'), data={
-            'customer': 1,
-            'default_periods': 0,
-            'start_period': (TODAY - datetime.timedelta(days=30)).strftime(
-                  '%m/%d/%Y'),
-            'end_period': TODAY.strftime('%m/%d/%Y'),
-        })
-        self.assertEqual(resp.status_code, 200)
-
-    def test_customer_statement_pdf(self):
-        kwargs={
-                 'start': (datetime.date.today() \
-                             - datetime.timedelta(365)).strftime('%d %B %Y'),
-                 'end': datetime.date.today().strftime('%d %B %Y'),
-                 'customer': 1
-             }
-        req = RequestFactory().get(reverse('invoicing:customer-statement-pdf',
-             kwargs=kwargs))
-        resp = CustomerStatementPDFView.as_view()(req, **kwargs)
-        self.assertEqual(resp.status_code, 200)
 
     def test_get_invoice_aging_report_page(self):
         resp = self.client.get(reverse('invoicing:invoice-aging'))
@@ -371,14 +344,14 @@ class InvoiceViewTests(TestCase):
                     'selected': '1 - item',
                     'hours': 1,
                     'fee': '200',
-                    'tax': '1 - tax',
+                    'tax': 15,
                     'discount': '0',
                     'rate': 50
                 },
                 {   
                     'type': 'expense',
                     'selected': '1 - item',
-                    'tax': '1 - tax',
+                    'tax': 15,
                     'discount': '0'
                 }
                 ])
@@ -390,11 +363,6 @@ class InvoiceViewTests(TestCase):
         imc.create_all()
         create_test_user(cls)
         create_test_common_entities(cls)
-        UserProfile.objects.create(
-            user=User.objects.get(username='Testuser'),
-            email_address="test@address.com",
-            email_password='123',
-        )
 
             
     def setUp(self):
@@ -474,21 +442,8 @@ class InvoiceViewTests(TestCase):
             kwargs={'pk':1}))
         self.assertEqual(resp.status_code, 200)
 
-    def test_get_invoice_email_page(self):
-        with self.assertRaises(Exception):
-            resp = self.client.get(reverse('invoicing:invoice-email',
-                kwargs={'pk':1})) 
-        
 
-    def test_post_invoice_email_page(self):
-        with self.assertRaises(Exception):
-            self.client.post(reverse('invoicing:invoice-email',
-            kwargs={'pk':1}), data={
-                'recipient': 'kandoroc@gmail.com',
-                'subject': 'Test Subject',
-                'content': 'TestContent'
-            })
-
+   
     def test_get_invoice_returns_page(self):
         resp = self.client.get(reverse('invoicing:invoice-returns',
             kwargs={'pk': 1}))
@@ -592,7 +547,7 @@ class QuotationViewTests(TestCase):
                     'type': 'service',
                     'selected': '1 - item',
                     'hours': 1,
-                    'tax': '1 - tax',
+                    'tax': 15,
                     'discount': '0',
                     'fee': 200,
                     'rate': 20.00
@@ -600,7 +555,7 @@ class QuotationViewTests(TestCase):
                 {   
                     'type': 'expense',
                     'selected': '1 - item',
-                    'tax': '1 - tax',
+                    'tax': 15,
                     'discount': '0'
                 }
                 ])
@@ -709,7 +664,7 @@ class ConfigWizardTests(TestCase):
         }
 
 
-        data_list = [config_data, customer_data, rep_data]
+        data_list = [config_data, customer_data]
 
         for step, data in enumerate(data_list, 1):
 

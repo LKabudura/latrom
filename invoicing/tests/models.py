@@ -104,14 +104,6 @@ class SalesRepModelTests(TestCase):
         imc.create_all()
     
 
-    def test_sales_total(self):
-        self.invoice.status='paid'
-        self.invoice.due=TODAY
-        self.invoice.save()
-        self.assertEqual(self.sales_representative.sales(TODAY, TODAY), D(210))
-        self.invoice.status='invoice'
-        self.invoice.save()
-
 
 class CreditNoteModelTests(TestCase):
     fixtures = ['common.json','invoicing.json', 'inventory.json']
@@ -180,7 +172,7 @@ class ProductInvoiceTests(TestCase):
         self.assertEqual(self.invoice.cost_of_goods_sold, 10)
 
     def test_total(self):
-        self.product_line.tax = self.tax
+        self.product_line.tax = 15
         self.product_line.save()
         self.assertAlmostEqual(self.invoice.total, D('211.50'))
         self.product_line.tax=None
@@ -205,10 +197,10 @@ class ProductInvoiceTests(TestCase):
 
     def test_tax_amount(self):
         '''15% tax on $10'''
-        self.product_line.tax = self.tax
+        self.product_line.tax = 15
         self.product_line.save()
         self.assertAlmostEqual(self.invoice.tax_amount, D('1.50'))
-        self.product_line.tax=None
+        self.product_line.tax=15
         self.product_line.save()
 
     def test_subtotal(self):
@@ -227,12 +219,6 @@ class ProductInvoiceTests(TestCase):
         self.assertEqual(wh_item.quantity, initial_quantity - 1)
         wh_item.quantity = 10
         wh_item.save()
-
-    def test_create_entry(self):
-        self.invoice.create_entry()
-        self.assertIsInstance(self.invoice.entry, JournalEntry)
-        self.invoice.status = "invoice"
-        self.invoice.save()
 
     def test_create_sales_invoice_line(self):
         self.assertIsInstance(self.product_line, InvoiceLine)
@@ -283,7 +269,7 @@ class ProductInvoiceTests(TestCase):
 
 
 class InvoiceModelTests(TestCase):
-    fixtures = ['common.json','invoicing.json', 'journals.json']
+    fixtures = ['common.json','invoicing.json']
     
     @classmethod
     def setUpTestData(cls):
@@ -298,7 +284,7 @@ class InvoiceModelTests(TestCase):
             'type': 'product',
             'selected': '1-name',
             'quantity': 1,            
-            'tax': '1- tax',
+            'tax': 15,
             'discount': '0',
             'unitPrice': 50.00
         })
@@ -310,7 +296,7 @@ class InvoiceModelTests(TestCase):
             'type': 'service',
             'selected': '1-name',
             'hours': 0,
-            'tax': '1- tax',
+            'tax': 15,
             'fee': '200',
             'discount': '0',
             'rate': 50
@@ -333,15 +319,5 @@ class InvoiceModelTests(TestCase):
         self.assertIsInstance(self.service_line.line, InvoiceLine)
 
    
-    def test_service_cost_of_sale(self):
-        print("#errorlist")
-        c = InvoiceLine.objects.create(
-            service=self.service_line_component,
-            invoice=self.invoice,
-            line_type=2)
-        self.assertEqual(self.service_line_component.cost_of_sale, 
-            self.expense.amount)
-        c.delete()
-
     def test_service_gross_income(self):
         pass

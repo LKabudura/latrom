@@ -14,7 +14,6 @@ class InvoicingModelCreator():
         self.create_invoice()
         self.create_quotation()
         self.create_payment()
-        self.create_sales_representative()
         self.create_product_line()
         self.create_product_line_component()
         self.create_service_line()
@@ -56,15 +55,13 @@ class InvoicingModelCreator():
             imc = InventoryModelCreator(self.cls)
             imc.create_warehouse()
 
-        if not hasattr(self.cls, 'sales_representative'):
-            self.create_sales_representative()
 
         self.cls.invoice = Invoice.objects.create(
             draft=False,
             status='invoice',
             customer=self.cls.customer_org,
             ship_from=self.cls.warehouse,
-            salesperson=self.cls.sales_representative
+            salesperson='person'
             )
 
         return self.cls.invoice 
@@ -80,8 +77,6 @@ class InvoicingModelCreator():
             imc = InventoryModelCreator(self.cls)
             imc.create_warehouse()
 
-        if not hasattr(self.cls, 'sales_representative'):
-            self.create_sales_representative()
 
         self.cls.quotation = Invoice.objects.create(
             draft=False,
@@ -90,7 +85,7 @@ class InvoicingModelCreator():
             quotation_valid=datetime.date.today(),
             customer=self.cls.customer_org,
             ship_from=self.cls.warehouse,
-            salesperson=self.cls.sales_representative
+            salesperson='self.cls.sales_representative'
             )
 
         return self.cls.quotation
@@ -108,12 +103,8 @@ class InvoicingModelCreator():
         self.cls.product_line_component
 
     def create_service_line_component(self):
-        if not hasattr(self.cls, 'service'):
-            smc = ServiceModelCreator(self.cls)
-            smc.create_service()
-
         self.cls.service_line_component = ServiceLineComponent.objects.create(
-            service=self.cls.service,
+            service='service',
             hours=0,
             flat_fee=100,
             hourly_rate=10
@@ -163,14 +154,11 @@ class InvoicingModelCreator():
         if not hasattr(self.cls, 'invoice'):
             self.create_invoice()
 
-        if not hasattr(self.cls, 'sales_representative'):
-            self.create_sales_representative()
-
         self.cls.payment = Payment.objects.create(
             invoice=self.cls.invoice,
             amount=10,
             date=datetime.date.today(),
-            sales_rep=self.cls.sales_representative
+            sales_rep='self.cls.sales_representative'
         )
 
     def create_credit_note(self):

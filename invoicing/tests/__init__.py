@@ -10,6 +10,5 @@ from .views import (ConfigWizardTests,
     CommonViewsTests, 
     ReportViewsTests, 
     CustomerViewsTests, 
-    SalesRepViewsTests, 
     InvoiceViewTests, 
     QuotationViewTests)

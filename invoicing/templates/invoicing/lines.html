@@ -1,4 +1,3 @@
-{% load accounting %}
 <tbody class="item-table">
     {% for item in page %}
     {% if item.line_type == 1 %}
@@ -13,7 +12,7 @@
     {% elif item.line_type == 2 %}
     <tr>
         <td>[SERVICE] {{item.name}} {% if item.component.hours > 0 %} @ {{item.component.hourly_rate |floatformat:2 }}/Hr + {% else %}, {% endif %}
-            Flat Rate: {{item.component.flat_fee |active_currency }}</td>
+            Flat Rate: {{item.component.flat_fee |floatformat:2 }}</td>
         <td>{{item.component.hours |floatformat:2 }}</td>
         <td>Hrs</td>
         <td>{{item.discount_total |floatformat:2 }}</td>

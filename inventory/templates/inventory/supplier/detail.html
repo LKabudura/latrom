@@ -23,9 +23,7 @@
             <a class="dropdown-item" href="{% url 'inventory:order-create'  supplier=object.pk  %}">
                 <i class="fas fa-receipt"></i> Make Purchase Order
             </a>
-            <a class="dropdown-item" href="{% url 'accounting:direct-payment-supplier'  supplier=object.pk  %}">
-                <i class="fas fa-money-check"></i> Make Payment To supplier
-            </a>
+            
 
         </div>
     </div>
@@ -40,13 +38,8 @@
                         {% endif %} </p>
                     <p class="card-text">Name: {{object}}</p>
                     <h5>Contact Details</h5>
-                    <p class="card-text">Email: <a href="{% url 'messaging:create-message' %}">{{object.email}}</a></p>
                     <p class="card-text">Address: {{object.address}}</p>
-                    <h4 class="card-title">Vendor Account</h4>
-                    <p class="card-text">Name: {{object.account}}</p>
-                    <p class="card-text">Balance: {{object.account.balance}}</p>
-                    <a href="{% url 'accounting:account-detail' pk=object.account.pk %}"
-                        class="btn btn-secondary">View</a>
+                    
                 </div>
             </div>
         </div>
@@ -142,7 +135,7 @@
 
                                         <td>{{m.full_name}}</td>
                                         <td>{{m.phone}}</td>
-                                        <td><a href="{% url 'messaging:create-message' %}">{{m.email}}</a></td>
+                                        
                                         <td>
                                             <a href="{% url 'base:individual-detail' pk=m.pk %}"
                                                 class="btn btn-success btn-sm">View</a>

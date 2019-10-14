@@ -50,5 +50,4 @@ urlpatterns = [
         name='notes-list'),
     path('blank-report/', views.ReportBlankView.as_view(),
         name='blank-report'),
-    path('api/current-db/', views.current_db, name='api-current-db')
 ]

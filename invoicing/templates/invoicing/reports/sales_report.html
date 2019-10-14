@@ -1,7 +1,6 @@
 `{% extends "common_data/page/pdf_page.html" %}
 
 {% block page_contents %}
-{% load accounting %}
 
 <style>
     .shrink a {
@@ -36,8 +35,8 @@
             <h1>Sales Report</h1>
 
             <h4>Period Covering: {{start}} to {{end}}</h4>
-            <p>Total Sales over period: {{total_sales | active_currency}}</p>
-            <p>Average daily sales: {{average_sales | active_currency}}</p>
+            <p>Total Sales over period: {{total_sales | floatformat:2}}</p>
+            <p>Average daily sales: {{average_sales | floatformat:2}}</p>
             {% autoescape off %}
             {{bar_graph}}
             

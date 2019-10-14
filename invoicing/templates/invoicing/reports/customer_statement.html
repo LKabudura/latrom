@@ -1,7 +1,6 @@
 {% extends "common_data/page/pdf_page.html" %}
 
 {% block pre_page %}
-{% load accounting %}
 <div class="jumbotron">
     <div class="dropdown">
         <button class="btn btn-primary dropdown-toggle" type="button" id="triggerId" data-toggle="dropdown"
@@ -18,7 +17,6 @@
 {% endblock  %}
 
 {% block page_contents %}
-{% load accounting %}
 <style>
     .cell {
         border-collapse: collapse;
@@ -53,7 +51,7 @@
                                 <td style="border-bottom: 1px solid black;" class="cell" colspan="4">Balance Brought
                                     Forward: </td>
                                 <td style="border-bottom: 1px solid black;" class="cell">
-                                    {{balance_brought_forward | accounting }}</td>
+                                    {{balance_brought_forward | floatformat:2 }}</td>
                             </tr>
                             {% for t in page %}
                             <tr>
@@ -82,7 +80,7 @@
                         <tfoot>
                             <tr style="border-top: 1px solid black;">
                                 <td colspan="4">Remaining Balance:</td>
-                                <td>{{balance_at_end_of_period | accounting}}</td>
+                                <td>{{balance_at_end_of_period | floatformat:2}}</td>
                             </tr>
                         </tfoot>
                         

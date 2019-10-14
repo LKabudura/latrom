@@ -57,11 +57,6 @@ class AsyncDashboard(ContextMixin, TemplateView):
 
         context['vendors'] = models.Supplier.objects.filter(active=True).count()
         context['warehouses'] = models.WareHouse.objects.all().count()
-        context['open_requisitions'] = EquipmentRequisition.objects.filter(
-                released_by__isnull=True).count()  +  \
-            ConsumablesRequisition.objects.filter(
-                released_by__isnull=True).count()
-
         context['pending_transfers'] = models.TransferOrder.objects.filter(
             completed=False).count()
 
@@ -167,7 +162,7 @@ class ConfigWizard(ConfigWizardBase):
 
     def get_form_initial(self, step):
         initial = super().get_form_initial(step)
-        if step == '4':
+        if step == '2':
             initial.update({'vendor_type': 'organization'})
 
         return initial

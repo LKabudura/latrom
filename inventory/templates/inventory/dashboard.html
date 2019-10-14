@@ -123,29 +123,24 @@
                                 </ul>
                             </div>
                         </div>
-
-                        {% if use_equipment_inventory or use_consumables_inventory %}
                         <div class="card bg-primary text-white">
                             <div class="card-header">
-                                <h4 class="card-title"><i class="fas fa-file-signature"></i> Requisitions</h4>
+                                <h4 class="card-title"><i class="fas fa-sliders-h"></i> Configuration</h4>
                             </div>
                             <div class="card-body">
                                 <ul class="list-group">
-
                                     <li class="list-group-item hvr-grow">
-                                        <a href="{% url 'services:equipment-requisition-list' %}">Manage Equipment
-                                            Requisitions</a>
+                                        <a href="{% url 'inventory:config' pk=1 %}">Settings</a>
                                     </li>
                                     <li class="list-group-item hvr-grow">
-                                        <a href="{% url 'services:consumable-requisition-list' %}">Manage Consumables
-                                            Requisitions</a>
+                                        <a href="{% url 'inventory:category-list' %}">Manage Inventory Categories</a>
                                     </li>
-                                    <li class="list-group-item hvr-grow">...</li>
-
+                                    <li class="list-group-item hvr-grow">
+                                        <a href="{% url 'inventory:unit-list' %}">Manage Units Of Measure</a>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
-                        {% endif %}
                         <div class="card bg-primary text-white">
                             <div class="card-header">
                                 <h4 class="card-title"><i class="fas fa-chart-bar"></i> Reports</h4>
@@ -172,43 +167,16 @@
                                                     href="{% url 'inventory:payments-due-report' %}">
                                                     Payments Due Report
                                                 </a>
-                                                <a class='dropdown-item'
-                                                    href="{% url 'inventory:vendor-balance-report' %}">
-                                                    Vendor Balance Report
-                                                </a>
+                                                
                                                 <a class='dropdown-item'
                                                     href="{% url 'inventory:vendor-average-days-to-deliver-report' %}">
                                                     Vendor Average Days To Deliver Report
                                                 </a>
-                                                <a class='dropdown-item'
-                                                    href="{% url 'inventory:vendor-transactions-form' %}">
-                                                    Vendor Transactions Report
-                                                </a>
+                                                
                                             </div>
                                         </div>
                                     </li>
 
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <hr class="my-4" />
-                    <div class="card-deck">
-                        <div class="card bg-primary text-white">
-                            <div class="card-header">
-                                <h4 class="card-title"><i class="fas fa-sliders-h"></i> Configuration</h4>
-                            </div>
-                            <div class="card-body">
-                                <ul class="list-group">
-                                    <li class="list-group-item hvr-grow">
-                                        <a href="{% url 'inventory:config' pk=1 %}">Settings</a>
-                                    </li>
-                                    <li class="list-group-item hvr-grow">
-                                        <a href="{% url 'inventory:category-list' %}">Manage Inventory Categories</a>
-                                    </li>
-                                    <li class="list-group-item hvr-grow">
-                                        <a href="{% url 'inventory:unit-list' %}">Manage Units Of Measure</a>
-                                    </li>
                                 </ul>
                             </div>
                         </div>

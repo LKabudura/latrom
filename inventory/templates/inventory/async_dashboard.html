@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% block window %}
-{% load accounting %}
 <div class="container">
                         <div class="row">
                             <div class="col-sm-2">
@@ -22,7 +21,7 @@
                                                 <h3># Outstanding Orders: <br>{{outstanding_orders}}</h3>
                                             </div>
                                             <div class="bg-primary text-white dashbox">
-                                                <h3>Money Owed to Vendors: <br>{{money_owed | active_currency}}</h3>
+                                                <h3>Money Owed to Vendors: <br>{{money_owed | floatformat:2}}</h3>
                                             </div>
                                         </div>
                                         <hr class="my-4">
@@ -33,9 +32,11 @@
                                             <div class="bg-primary text-white dashbox">
                                                 <h3># Warehouses: <br>{{warehouses}}</h3>
                                             </div>
-                                            <div class="dashbox white-on-blue">
-                                                <h3># Open Requisitions: <br>{{open_requisitions}}</h3>
+                                            <div class="bg-primary text-white dashbox">
+                                                <h3># Unique Products: <br>{{products}}</h3>
                                             </div>
+
+                                            
                                         </div>
                                         <hr class="my-4">
                                         <div class="dash-container">
@@ -49,13 +50,7 @@
                                                 <h3># Unique Consumable Items: <br>{{consumables}}</h3>
                                             </div>
                                         </div>
-                                        <hr class="my-4">
-                                        <div class="dash-container">
-                                            <div class="bg-primary text-white dashbox">
-                                                <h3># Unique Products: <br>{{products}}</h3>
-                                            </div>
-                                        </div>
-
+                                        
                                     </div>
                                     <div id="Graph" class="tab-pane fade in">
                                         

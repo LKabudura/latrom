@@ -8,15 +8,9 @@ module.exports = {
 
     context: __dirname,
     entry:  {
-        accounting: './js/accounting',
         invoicing: './js/invoicing',
-        employees: './js/employees',
         inventory: './js/inventory',
-        calendar: './js/calendar',
-        services: './js/services',
-        manufacturing: './js/manufacturing',
         widgets: './js/widgets',
-        messaging: './js/messaging'
     },
     output: {
         path: path.resolve('./bundles/'),

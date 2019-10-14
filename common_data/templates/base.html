@@ -49,7 +49,6 @@
     {% block window %}{% endblock %}
     <script type="text/javascript" src="{% static 'common_data/js/async_select.js' %}"></script>
 
-{% include 'notifications.html' %}
 
 {% include 'iframe_window.html' %}
 
@@ -71,16 +70,6 @@
             $("#sales").addClass('active')
         }else if(url.search('inventory') !== -1){
             $("#inventory").addClass('active')
-        }else if(url.search('services') !== -1){
-            $("#services").addClass('active')
-        }else if(url.search('accounting') !== -1){
-            $("#accounting").addClass('active')
-        }else if(url.search('employees') !== -1){
-            $("#employees").addClass('active')
-        }else if(url.search('messaging') !== -1){
-            $("#inbox").addClass('active')
-        }else if(url.search('planner') !== -1){
-            $("#planner").addClass('active')
         }
     }
 

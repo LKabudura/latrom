@@ -1,5 +1,4 @@
 {% extends "window.html" %}
-{% load accounting %}
 {% block content %}
 
 <div class="jumbotron">
@@ -20,8 +19,8 @@
                     <div class="card-body">
                         <h4 class="card-title">Meta Data</h4>
                         <p class="card-text">Order: {{object.pk}}</p>
-                        <p class="card-text">Order Value: {{object.total | active_currency }}</p>
-                        <p class="card-text">Total shipping costs: {{object.total_shipping_costs |active_currency}}</p>
+                        <p class="card-text">Order Value: {{object.total | floatformat:2 }}</p>
+                        <p class="card-text">Total shipping costs: {{object.total_shipping_costs |floatformat:2}}</p>
                         <p class="card-text">Percentage shipping cost: {{object.percentage_shipping_cost | floatformat:2 }}%</p>
                     </div>
                 </div>
@@ -40,7 +39,7 @@
                             <tbody>
                                 {% for entry in object.shipping_cost_entries.all %}
                                 <tr>
-                                    <td><a href="{% url 'accounting:entry-detail' pk=entry.pk %}">{{entry.pk}}</a></td>
+                                    
                                     <td>{{entry.date}}</td>
                                     <td>{{entry.total_debits}}</td>
                                     <td style="width:50%">{{entry.memo | truncatechars:80}}</td>

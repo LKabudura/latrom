@@ -18,10 +18,8 @@ class ProductEntry extends Component{
                 quantity: 0,
                 unitPrice: 0,
                 discount: 0,
-                tax: 1,
+                tax: 0,
             })
-            let tax = document.getElementById('product-tax');
-            tax.value = 1;
         }
     }
 
@@ -38,27 +36,18 @@ class ProductEntry extends Component{
             'method': 'get',
             'url': '/inventory/api/inventory-item/' + pk 
         }).then((res)=>{
-            //tax 
-            let tax = document.getElementById('product-tax');
-            if(res.data.product_component.tax){
-                tax.value = res.data.product_component.tax.id;
-            }
-
             this.setState({
                 unitPrice: res.data.unit_sales_price,
-                tax:res.data.product_component.tax.id + ' - ' + 
-                        res.data.product_component.tax.name + '@' +
-                        res.data.product_component.tax.rate,
+                tax:res.data.product_component.tax,
                 selected: value
             }, 
                 () => this.props.changeHandler(this.state))
         })
-        
     }
 
     handleProductClear = () =>{
         let tax = document.getElementById('product-tax');
-        tax.value = 1;
+        tax.value = 0;
         this.setState({
             quantity: 0,
             unitPrice: 0,
@@ -67,18 +56,7 @@ class ProductEntry extends Component{
         }, () => this.props.changeHandler(this.state));
     }
 
-    taxHandler = (value) =>{
-        axios({
-            method: 'get',
-            url: '/accounting/api/tax/' + value
-        }).then(res =>{
-            this.setState({tax: res.data.id + ' - ' 
-                                + res.data.name  + '@' 
-                                + res.data.rate}, 
-                () => this.props.changeHandler(this.state))
-
-        })
-    }
+    
     
     render(){
         return(
@@ -135,19 +113,12 @@ class ProductEntry extends Component{
                             </td>
                             
                             <td >
-                                {/*Use a tax choice field */}
-                                <AsyncSelect 
-                                    noCSS
-                                    ID='product-tax'
-                                    dataURL="/accounting/api/tax"
-                                    name="tax"
-                                    resProcessor={(res) =>{
-                                        return res.data.map((tax) =>({
-                                            name: tax.name,
-                                            value: tax.id
-                                        }))
-                                    }}
-                                    handler={this.taxHandler}/>
+                            <input 
+                            type="number"
+                            name="tax"
+                            value={this.state.tax}
+                            
+                            onChange={this.handler}/>
                             </td>
                             <td>
                                 <button 

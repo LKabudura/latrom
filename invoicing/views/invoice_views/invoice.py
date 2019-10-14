@@ -154,8 +154,6 @@ class InvoiceUpdateView(ContextMixin, UpdateView):
         
         process_data(items, inv)
 
-        if self.object.status in ["invoice", 'paid'] and not self.object.draft:
-            self.object.create_entry()
 
         return resp
 
@@ -172,13 +170,6 @@ class InvoicePaymentView(ContextMixin, CreateView):
         return {
             'invoice': self.kwargs['pk'],
             }
-
-    def post(self, *args, **kwargs):
-        resp = super().post(*args, **kwargs)
-        if self.object:
-            self.object.create_entry()
-
-        return resp
 
 
 class InvoicePaymentDetailView(ListView):
@@ -254,7 +245,6 @@ def verify_invoice(request, pk=None):
         inv.save()
 
         if inv.status == "invoice":
-            inv.create_entry()
             inv.update_inventory()
             inv.invoice_validated_by = form.cleaned_data['user']
             inv.save()

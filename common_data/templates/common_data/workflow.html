@@ -69,48 +69,7 @@
 </style>
     <div class="workflow-container">
     
-        <div class=" workflow-widget">
-            <div class="workflow-img">
-                <a href="/planner/dashboard">
-                <i class="fas fa-calendar-alt" style="font-size:96px;"></i>
-                </a>
-            </div>
-            <div class="workflow-label">
-                <h6>Planner<span class="dropdown ">
-                                <button class="workflow-btn " data-toggle="dropdown"     
-                                        type="dropdown" id="planner">
-                                    <i class="fas fa-ellipsis-h"></i>
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="/calendar/month/{{month}}">View Calendar</a>
-                                    <a class="dropdown-item" href="{% url 'planner:agenda' pk=request.user.pk %}">View Agenda</a>
-                                    <a class="dropdown-item" href="{% url 'planner:event-create'  %}">Create Event</a>
-                                </div>
-                            </span></h6>
-                <hr>
-                <p>Organize business activities</p>
-            </div>
-        </div>
-        <div class=" workflow-widget">
-            <div class="workflow-img">
-                <a href="/messaging/dashboard">
-                    <i class="fas fa-comments" style="font-size:96px;"></i>
-                </a>
-            </div>
-            <div class="workflow-label">
-                <h6>Messaging<span class="dropdown">
-                                <button class="workflow-btn" data-toggle="dropdown"     
-                                        type="dropdown" id="planner">
-                                    <i class="fas fa-ellipsis-h"></i>
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="{% url 'messaging:inbox'  %}">Go to my inbox</a>
-                                </div>
-                            </span></h6>
-                <hr>
-                <p>Communicate within your organization</p>
-            </div>
-        </div>
+        
         <div class=" workflow-widget">
             <div class="workflow-img">
                 <a href="/inventory/">
@@ -156,78 +115,6 @@
                         </span></h6>
                 <hr>
                 <p>Track Interactions with your customers</p>
-            </div>
-        </div>
-        <div class=" workflow-widget">
-            <div class="workflow-img">
-                <a href="/services/">
-                    <i class="fas fa-toolbox" style="font-size:96px;"></i>
-                </a>
-            </div>
-            <div class="workflow-label">
-                <h6>Services<span class="dropdown">
-                                <button class="workflow-btn " data-toggle="dropdown"     
-                                        type="dropdown" id="planner">
-                                    <i class="fas fa-ellipsis-h"></i>
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="{% url 'services:create-service' %}">Create New Service Listing</a>
-                                    <a class="dropdown-item" href="{% url 'services:work-order-list' %}">Manage Work Orders</a>
-                                </div>
-                    </span></h6>
-                <hr>
-                <p>Manage offered services</p>
-            </div>
-        </div>
-        <div class=" workflow-widget">
-            <div class="workflow-img">
-                <a href="/accounting/">
-                    <i class="fas fa-dollar-sign" style="font-size:96px;"></i>
-                </a>
-            </div>
-            <div class="workflow-label">
-                <h6>Accounting<span class="dropdown">
-                                <button class="workflow-btn " data-toggle="dropdown"     
-                                        type="dropdown" id="planner">
-                                    <i class="fas fa-ellipsis-h"></i>
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="{% url 'accounting:account-list' %}">View Chart of Accounts</a>
-                                    <a href=" {% url 'accounting:compound-entry' %} " class="dropdown-item">Create Entry</a>
-                                </div>
-                            </span></h6>
-                <hr>
-                <p>Keep track of financial transactions</p>
-            </div>
-        </div>
-        <div class=" workflow-widget">
-            <div class="workflow-img">
-               <a class="workflow-link" href="/employees/">
-                     <i class="fas fa-users" style="font-size:96px;"></i>
-                </a>
-            </div>
-            <div class="workflow-label">
-                <h6>Employees<span class="dropdown">
-                    <button class="workflow-btn " data-toggle="dropdown"     
-                                        type="dropdown" id="planner">
-                                    <i class="fas fa-ellipsis-h"></i>
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="{% url 'employees:portal-login' %}">Employee Portal</a>
-                                    <a class="dropdown-item" href="{% url 'employees:time-logger' %}">Time Logger</a>
-                                    <a class="dropdown-item" href="{% url 'employees:list-employees' %}">View Employees List</a>
-                                </div>
-                </span></h6>
-                <hr>
-                <p>Manage Payroll, Vacations and Roles</p>
-            </div>
-        </div>
-        <div class="workflow-widget" style="display:none">
-            <div class="workflow-img"></div>
-            <div class="workflow-label">
-                <h6><span class="dropdown"></span></h6>
-                <hr>
-                <p></p>
             </div>
         </div>
     

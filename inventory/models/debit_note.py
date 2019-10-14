@@ -40,7 +40,7 @@ class DebitNote(models.Model):
             return 0
         order = self.returned_items.first().item.order
         if order.tax:
-            return self.returned_subtotal * (D(self.order.tax.rate) / D(100.0))
+            return self.returned_subtotal * (D(self.order.tax) / D(100.0))
         return 0
 
     @property
